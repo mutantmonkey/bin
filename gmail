@@ -1,0 +1,14 @@
+#!/bin/sh
+################################################################################
+# gmail - Gmail wrapper script for Firefox
+#
+# author: mutantmonkey <mutantmonkey@gmail.com>
+################################################################################
+
+#to="`echo $1 | sed 's/mailto://'`";
+
+if [ ! $1 = "" ] ; then
+	firefox -remote "openurl(https://mail.google.com/mail/?extsrc=mailto&url=$1,new-tab)"
+else
+	firefox -remote "openurl(https://mail.google.com/)"
+fi

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Reverse DNS utility used to find the hostname(s) of the webserver(s) hosting a
+# particular website (domain name). It requires the host binary to be installed,
+# for most package systems you can find it in the bind-tools package.
+
+# Copyright (C) 2007 Dietrich Moerman - http://dmoerman.be
+# Released under the GNU General Public License v2
+
+# Please submit any suggestions to the above website.
+
+if [ $# -ne 1 ];
+then
+	echo "Usage: $0 <host name>"
+	exit 1
+fi
+ips=`host $1 |grep 'has address' |awk '{print $4}'`
+if [ -z "$ips" ];
+then
+	echo "No IP addresses found for $1."
+	exit 1
+fi
+for ip in $ips;
+do
+	host=`host $ip |head -n1 |awk '{sub(/\.$/, "", $5); print $5}'`
+	if [ "$host" = "3(NXDOMAIN)" ];
+	then
+		host="--"
+	fi
+	echo -e "$ip\t $host"
+done
