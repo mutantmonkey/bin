@@ -7,7 +7,7 @@
 
 IFACE="eth0"
 
-## Default rules for when a packet does not match our settings
+# Default rules for when a packet does not match our settings {{{
 iptables -P INPUT DROP
 iptables -P FORWARD DROP
 iptables -P OUTPUT ACCEPT
@@ -20,43 +20,44 @@ ip6tables -P OUTPUT ACCEPT
 ip6tables -F
 ip6tables -X
 
-## Create custom chains
+# }}}
+
+
+# Create custom chains {{{
 iptables -N open
 iptables -N interfaces
 
 ip6tables -N open
 ip6tables -N interfaces
+# }}}
 
-#
-# INPUT rules
-#
 
-## Accept all packets belonging to established connections
+# INPUT rules {{{
+
+# Accept all packets belonging to established connections
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 ip6tables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 
-## Add rule for our custom chains
+# Add rule for our custom chains
 iptables -A INPUT -j interfaces
 iptables -A INPUT -j open
 
 ip6tables -A INPUT -j interfaces
 ip6tables -A INPUT -j open
 
-## Specific deny cases for TCP and UDP packets
+# Specific deny cases for TCP and UDP packets
 iptables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
 iptables -A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
 
 ip6tables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
 ip6tables -A INPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
 
-## Accept all traffic from trusted interfaces
+# Accept all traffic from trusted interfaces
 iptables -A interfaces -i lo -j ACCEPT
 ip6tables -A interfaces -i lo -j ACCEPT
 
-#
-# IPv6 Rules
+# IPv6 Rules {{{
 # Based upon http://www.cert.org/downloads/IPv6/ip6tables_rules.txt
-#
 
 # Drop packets with RH0 headers
 ip6tables -A INPUT -m rt --rt-type 0 -j DROP
@@ -90,9 +91,10 @@ ip6tables -A OUTPUT -p icmpv6 --icmpv6-type router-solicitation -m hl --hl-eq 25
 # Accept all other inbound ICMPv6 packets
 ip6tables -A INPUT -p icmpv6 -j ACCEPT
 
-#
-# IPv4 Rules
-#
+# }}}
+
+
+# IPv4 Rules {{{
 
 # Accept all inbound ICMP packets
 iptables -A INPUT -p icmp -j ACCEPT
@@ -107,9 +109,10 @@ iptables -I INPUT -p icmp --icmp-type router-solicitation -j DROP
 iptables -I INPUT -p icmp --icmp-type address-mask-request -j DROP
 iptables -I INPUT -p icmp --icmp-type address-mask-reply -j DROP
 
-#
-# Protection against common attacks
-#
+# }}}
+
+
+# Protection against common attacks {{{
 
 # Drop new incoming TCP connections that aren't SYN packets
 iptables -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
@@ -127,10 +130,15 @@ ip6tables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
 iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 ip6tables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 
-#
-# Save rules
-#
+# }}}
+
+# }}}
+
+
+# Save rules {{{
 
 /etc/rc.d/iptables save
 /etc/rc.d/ip6tables save
+
+# }}}
 
