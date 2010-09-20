@@ -33,7 +33,7 @@ conn.login(username, password)
 
 unread = re.compile("UNSEEN (\d+)")
 unread_count = unread.search(conn.status(mailbox, '(UNSEEN)')[1][0]).group(1)
-print unread_count
+print int(unread_count)
 
 conn.logout()
 
