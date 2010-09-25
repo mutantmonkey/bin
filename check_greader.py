@@ -48,7 +48,10 @@ reader_resp = urllib2.urlopen(reader_req)
 
 data = json.loads(reader_resp.read())
 if len(data['unreadcounts']) > 0:
-	print int(data['unreadcounts'][0]['count'])
+	for obj in data['unreadcounts']:
+		objid = obj['id'].split('/')
+		if 'com.google' in objid and 'reading-list' in objid:
+			print int(obj['count'])
 else:
 	print 0
 
