@@ -71,10 +71,10 @@ ip6tables -A INPUT -p icmpv6 --icmpv6-type time-exceeded -j ACCEPT
 ip6tables -A INPUT -p icmpv6 --icmpv6-type parameter-problem -j ACCEPT
 
 # Block inbound pings
-ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-request -i $IFACE -j DROP
+#ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-request -i $IFACE -j DROP
 
 # Allow pings, but rate limit
-#ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-request -m limit --limit 900/min -j ACCEPT
+ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-request -m limit --limit 900/min -j ACCEPT
 ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-reply -m limit --limit 900/min -j ACCEPT
 
 # Allow some outbound ICMPv6 packets
