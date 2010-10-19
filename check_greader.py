@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 #################################################################################
 # check_greader.py - Check unread posts in Google Reader
 #

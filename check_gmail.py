@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 #################################################################################
 # check_gmail.py - Check unread messages in Gmail Inbox using IMAP
 #
