@@ -9,8 +9,11 @@ xsetroot -cursor_name left_ptr
 # Start statnot (should be configured to write to ~/.statnot)
 statnot &
 
+# Start stalonetray
+(sleep 1 && stalonetray -c ~/.config/stalonetrayrc) &
+
 # Run xdg startup apps
-dex -a &
+(sleep 2 && dex -a) &
 
 # Hack to get unread counts working
 update_unread_counts() {
