@@ -7,21 +7,21 @@ export OOO_FORCE_DESKTOP=gnome
 xsetroot -cursor_name left_ptr
 
 # Start statnot (should be configured to write to ~/.statnot)
-#statnot &
+statnot &
 
 # Bars {{{
 
 BAR_FONT="DejaVu Sans Mono-9"
-BAR_FG="#aaaaaa"
-BAR_BG="#111111"
+BAR_FG="#dcdccc"
+BAR_BG="#3f3f3f"
 
 BAR_LEFT_WIDTH=300
-BAR_TRAY_X=1100
+BAR_TRAY_X=300
 BAR_TRAY_SLOTS=6
-BAR_RIGHT_X=1202
+BAR_RIGHT_X=402
 
 # Start stalonetray
-(sleep 2 && stalonetray -c ~/.config/stalonetrayrc -geometry ${BAR_TRAY_SLOTS}x1+${BAR_TRAY_X}+0) &
+(sleep 2 && stalonetray -c ~/.config/stalonetrayrc -bg "${BAR_BG}" -geometry ${BAR_TRAY_SLOTS}x1+${BAR_TRAY_X}+0) &
 
 # Start dzen2
 (sleep 2 && conky -c ~/.config/dzen/conkyrc | dzen2 -bg "${BAR_BG}" -fg "${BAR_FG}" -fn "${BAR_FONT}" -ta r -x "${BAR_RIGHT_X}") &
