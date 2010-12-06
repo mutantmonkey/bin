@@ -70,9 +70,6 @@ ip6tables -A INPUT -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
 ip6tables -A INPUT -p icmpv6 --icmpv6-type time-exceeded -j ACCEPT
 ip6tables -A INPUT -p icmpv6 --icmpv6-type parameter-problem -j ACCEPT
 
-# Block inbound pings
-#ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-request -i $IFACE -j DROP
-
 # Allow pings, but rate limit
 ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-request -m limit --limit 900/min -j ACCEPT
 ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-reply -m limit --limit 900/min -j ACCEPT
@@ -99,10 +96,11 @@ ip6tables -A INPUT -p icmpv6 -j ACCEPT
 # Accept all inbound ICMP packets
 iptables -A INPUT -p icmp -j ACCEPT
 
-# Block inbound pings
-iptables -A INPUT -p icmp --icmp-type echo-request -i $IFACE -j DROP
+# Allow pings, but rate limit
+iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 900/min -j ACCEPT
+iptables -A INPUT -p icmp --icmp-type echo-reply -m limit --limit 900/min -j ACCEPT
 
-# Drop useless ICMP packets (well, not useless for routers)
+# Drop ICMP packets that we don't care about
 iptables -I INPUT -p icmp --icmp-type redirect -j DROP
 iptables -I INPUT -p icmp --icmp-type router-advertisement -j DROP
 iptables -I INPUT -p icmp --icmp-type router-solicitation -j DROP
