@@ -93,9 +93,6 @@ ip6tables -A INPUT -p icmpv6 -j ACCEPT
 
 # IPv4 Rules {{{
 
-# Accept all inbound ICMP packets
-iptables -A INPUT -p icmp -j ACCEPT
-
 # Allow pings, but rate limit
 iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 900/min -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-reply -m limit --limit 900/min -j ACCEPT
@@ -106,6 +103,9 @@ iptables -I INPUT -p icmp --icmp-type router-advertisement -j DROP
 iptables -I INPUT -p icmp --icmp-type router-solicitation -j DROP
 iptables -I INPUT -p icmp --icmp-type address-mask-request -j DROP
 iptables -I INPUT -p icmp --icmp-type address-mask-reply -j DROP
+
+# Accept all inbound ICMP packets
+iptables -A INPUT -p icmp -j ACCEPT
 
 # }}}
 
