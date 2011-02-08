@@ -1,2 +1,2 @@
 #!/bin/sh
-dmenu_run -i -nb '#111111' -nf '#aaaaaa' -sb '#3c3c3c' -sf '#ffffff' -fa 'DejaVu Sans Mono-9'
+dmenu_run -i -nb '#111111' -nf '#aaaaaa' -sb '#3c3c3c' -sf '#ffffff' -fn 'DejaVu Sans Mono-9'
