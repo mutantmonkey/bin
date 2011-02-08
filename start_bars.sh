@@ -1,4 +1,9 @@
 #!/bin/sh
+#################################################################################
+# start_bars.sh - bar script script (stalonetray and dzen2)
+#
+# author: mutantmonkey <mutantmonkey@gmail.com>
+################################################################################
 
 source $XDG_CONFIG_HOME/bars.conf
 

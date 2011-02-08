@@ -1,4 +1,9 @@
 #!/bin/sh
+#################################################################################
+# start_dwm.sh - dwm start script
+#
+# author: mutantmonkey <mutantmonkey@gmail.com>
+################################################################################
 
 # Force LibreOffice to use GTK+ theme
 export OOO_FORCE_DESKTOP=gnome
