@@ -5,15 +5,6 @@
 # author: mutantmonkey <mutantmonkey@gmail.com>
 ################################################################################
 
-# Force LibreOffice to use GTK+ theme
-export OOO_FORCE_DESKTOP=gnome
-
-# Set cursor name
-xsetroot -cursor_name left_ptr
-
-# Start statnot (should be configured to write to ~/.statnot)
-#statnot &
-
 # Start bars
 (sleep 2 && start_bars.sh) &
 #conky -c ~/.config/dwm/conkyrc | while read -r; do xsetroot -name "$REPLY"; done &
