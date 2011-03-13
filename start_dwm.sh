@@ -6,11 +6,11 @@
 ################################################################################
 
 # Start bars
-(sleep 2 && start_bars.sh) &
+(sleep $SPAWN_DELAY && start_bars.sh) &
 #conky -c ~/.config/dwm/conkyrc | while read -r; do xsetroot -name "$REPLY"; done &
 
 # Run xdg startup apps
-(sleep 2 && dex -a) &
+dex -a
 
 # Hack to get unread counts working
 update_unread_counts() {
@@ -19,7 +19,7 @@ update_unread_counts() {
 	sleep 300
 	update_unread_counts
 };
-(sleep 2 && update_unread_counts) &
+(sleep $SPAWN_DELAY && update_unread_counts) &
 
 exec dwm
 
