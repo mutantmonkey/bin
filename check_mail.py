@@ -41,7 +41,7 @@ status, mailboxes = conn.list()
 for mailbox_list_resp in mailboxes:
 	flags, delim, mailbox = list_response_regex.match(mailbox_list_resp).groups()
 	mailbox = mailbox.strip('"')
-	if mailbox in ('lists/novalug', 'lists/full-disclosure', 'logwatch', 'shopping/deals', 'sent', 'spam'):
+	if mailbox in ('aur', 'lists/novalug', 'lists/full-disclosure', 'logwatch', 'shopping/deals', 'sent', 'spam'):
 		continue
 	mbox_status = conn.status(mailbox, '(UNSEEN)')[1][0]
 	unread_match = unread_regex.search(mbox_status)
