@@ -3,7 +3,8 @@
 # pavol.sh - adjust pulseaudio volume
 #
 # author: mutantmonkey <mutantmonkey@gmail.com>
-# based on an article on the archwiki: https://wiki.archlinux.org/index.php/PulseAudio#volume_control
+# based on an article on the archwiki:
+# https://wiki.archlinux.org/index.php/PulseAudio#volume_control
 ################################################################################
 
 device="alsa_output.pci-0000_00_1b.0.analog-stereo"
