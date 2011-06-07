@@ -1,9 +1,1 @@
-#!/bin/bash
-################################################################################
-# hs - Hokie Stalker
-#
-# author: Chris Covington <cov@vt.edu>
-################################################################################
-
-echo $* | nc finger.vt.edu 79
-
+/media/stuff/code/hokiestalker/hs.py

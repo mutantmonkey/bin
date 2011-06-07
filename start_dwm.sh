@@ -14,7 +14,7 @@ dex -a
 
 # Hack to get unread counts working
 update_unread_counts() {
-	echo -n `check_gmail.py` > /dev/shm/gmail-${USER}
+	echo -n `check_mail.py` > /dev/shm/gmail-${USER}
 	echo -n `check_greader.py` > /dev/shm/greader-${USER}
 	sleep 300
 	update_unread_counts
