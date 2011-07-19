@@ -41,7 +41,7 @@ status, mailboxes = conn.list()
 for mailbox_list_resp in mailboxes:
 	flags, delim, mailbox = list_response_regex.match(mailbox_list_resp).groups()
 	mailbox = mailbox.strip('"')
-	if mailbox in ('aur', 'bugs', 'drafts', 'lists/novalug',
+	if mailbox in ('aur', 'bugs', 'cron', 'drafts', 'lists/novalug',
 			'lists/full-disclosure', 'lists/mappingdc',
 			'logwatch', 'shopping/deals', 'sent', 'spam'):
 		continue
