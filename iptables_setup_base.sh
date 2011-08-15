@@ -6,87 +6,89 @@
 ################################################################################
 
 IFACE="eth0"
+IPT=$(which iptables)
+IP6T=$(which ip6tables)
 
 # Default rules for when a packet does not match our settings {{{
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
-iptables -P OUTPUT ACCEPT
-iptables -F
-iptables -X
+$IPT -P INPUT DROP
+$IPT -P FORWARD DROP
+$IPT -P OUTPUT ACCEPT
+$IPT -F
+$IPT -X
 
-ip6tables -P INPUT DROP
-ip6tables -P FORWARD DROP
-ip6tables -P OUTPUT ACCEPT
-ip6tables -F
-ip6tables -X
+$IP6T -P INPUT DROP
+$IP6T -P FORWARD DROP
+$IP6T -P OUTPUT ACCEPT
+$IP6T -F
+$IP6T -X
 
 # }}}
 
 
 # Create custom chains {{{
-iptables -N open
-iptables -N interfaces
+$IPT -N open
+$IPT -N interfaces
 
-ip6tables -N open
-ip6tables -N interfaces
+$IP6T -N open
+$IP6T -N interfaces
 # }}}
 
 
 # INPUT rules {{{
 
 # Accept all packets belonging to established connections
-iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-ip6tables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+$IPT -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+$IP6T -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 
 # Add rule for our custom chains
-iptables -A INPUT -j interfaces
-iptables -A INPUT -j open
+$IPT -A INPUT -j interfaces
+$IPT -A INPUT -j open
 
-ip6tables -A INPUT -j interfaces
-ip6tables -A INPUT -j open
+$IP6T -A INPUT -j interfaces
+$IP6T -A INPUT -j open
 
 # Specific deny cases for TCP and UDP packets
-iptables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
-iptables -A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
+$IPT -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+$IPT -A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
 
-ip6tables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
-ip6tables -A INPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
+$IP6T -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+$IP6T -A INPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
 
 # Accept all traffic from trusted interfaces
-iptables -A interfaces -i lo -j ACCEPT
-ip6tables -A interfaces -i lo -j ACCEPT
+$IPT -A interfaces -i lo -j ACCEPT
+$IP6T -A interfaces -i lo -j ACCEPT
 
 # IPv6 Rules {{{
 # Based upon http://www.cert.org/downloads/IPv6/ip6tables_rules.txt
 
 # Drop packets with RH0 headers
-ip6tables -A INPUT -m rt --rt-type 0 -j DROP
-ip6tables -A FORWARD -m rt --rt-type 0 -j DROP
-ip6tables -A OUTPUT -m rt --rt-type 0 -j DROP
+$IP6T -A INPUT -m rt --rt-type 0 -j DROP
+$IP6T -A FORWARD -m rt --rt-type 0 -j DROP
+$IP6T -A OUTPUT -m rt --rt-type 0 -j DROP
 
 # Allow some inbound ICMPv6 packets
-ip6tables -A INPUT -p icmpv6 --icmpv6-type destination-unreachable -j ACCEPT
-ip6tables -A INPUT -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
-ip6tables -A INPUT -p icmpv6 --icmpv6-type time-exceeded -j ACCEPT
-ip6tables -A INPUT -p icmpv6 --icmpv6-type parameter-problem -j ACCEPT
+$IP6T -A INPUT -p icmpv6 --icmpv6-type destination-unreachable -j ACCEPT
+$IP6T -A INPUT -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
+$IP6T -A INPUT -p icmpv6 --icmpv6-type time-exceeded -j ACCEPT
+$IP6T -A INPUT -p icmpv6 --icmpv6-type parameter-problem -j ACCEPT
 
 # Allow pings, but rate limit
-ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-request -m limit --limit 900/min -j ACCEPT
-ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-reply -m limit --limit 900/min -j ACCEPT
+$IP6T -A INPUT -p icmpv6 --icmpv6-type echo-request -m limit --limit 900/min -j ACCEPT
+$IP6T -A INPUT -p icmpv6 --icmpv6-type echo-reply -m limit --limit 900/min -j ACCEPT
 
 # Allow some outbound ICMPv6 packets
-ip6tables -A OUTPUT -p icmpv6 --icmpv6-type destination-unreachable -j ACCEPT
-ip6tables -A OUTPUT -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
-ip6tables -A OUTPUT -p icmpv6 --icmpv6-type time-exceeded -j ACCEPT
-ip6tables -A OUTPUT -p icmpv6 --icmpv6-type parameter-problem -j ACCEPT
+$IP6T -A OUTPUT -p icmpv6 --icmpv6-type destination-unreachable -j ACCEPT
+$IP6T -A OUTPUT -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
+$IP6T -A OUTPUT -p icmpv6 --icmpv6-type time-exceeded -j ACCEPT
+$IP6T -A OUTPUT -p icmpv6 --icmpv6-type parameter-problem -j ACCEPT
 
 # Limit NDP messages to local network
-ip6tables -A OUTPUT -p icmpv6 --icmpv6-type neighbour-solicitation -m hl --hl-eq 255 -j ACCEPT
-ip6tables -A OUTPUT -p icmpv6 --icmpv6-type neighbour-advertisement -m hl --hl-eq 255 -j ACCEPT
-ip6tables -A OUTPUT -p icmpv6 --icmpv6-type router-solicitation -m hl --hl-eq 255 -j ACCEPT
+$IP6T -A OUTPUT -p icmpv6 --icmpv6-type neighbour-solicitation -m hl --hl-eq 255 -j ACCEPT
+$IP6T -A OUTPUT -p icmpv6 --icmpv6-type neighbour-advertisement -m hl --hl-eq 255 -j ACCEPT
+$IP6T -A OUTPUT -p icmpv6 --icmpv6-type router-solicitation -m hl --hl-eq 255 -j ACCEPT
 
 # Accept all other inbound ICMPv6 packets
-ip6tables -A INPUT -p icmpv6 -j ACCEPT
+$IP6T -A INPUT -p icmpv6 -j ACCEPT
 
 # }}}
 
@@ -94,18 +96,18 @@ ip6tables -A INPUT -p icmpv6 -j ACCEPT
 # IPv4 Rules {{{
 
 # Allow pings, but rate limit
-iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 900/min -j ACCEPT
-iptables -A INPUT -p icmp --icmp-type echo-reply -m limit --limit 900/min -j ACCEPT
+$IPT -A INPUT -p icmp --icmp-type echo-request -m limit --limit 900/min -j ACCEPT
+$IPT -A INPUT -p icmp --icmp-type echo-reply -m limit --limit 900/min -j ACCEPT
 
 # Drop ICMP packets that we don't care about
-iptables -I INPUT -p icmp --icmp-type redirect -j DROP
-iptables -I INPUT -p icmp --icmp-type router-advertisement -j DROP
-iptables -I INPUT -p icmp --icmp-type router-solicitation -j DROP
-iptables -I INPUT -p icmp --icmp-type address-mask-request -j DROP
-iptables -I INPUT -p icmp --icmp-type address-mask-reply -j DROP
+$IPT -I INPUT -p icmp --icmp-type redirect -j DROP
+$IPT -I INPUT -p icmp --icmp-type router-advertisement -j DROP
+$IPT -I INPUT -p icmp --icmp-type router-solicitation -j DROP
+$IPT -I INPUT -p icmp --icmp-type address-mask-request -j DROP
+$IPT -I INPUT -p icmp --icmp-type address-mask-reply -j DROP
 
 # Accept all inbound ICMP packets
-iptables -A INPUT -p icmp -j ACCEPT
+$IPT -A INPUT -p icmp -j ACCEPT
 
 # }}}
 
@@ -113,16 +115,16 @@ iptables -A INPUT -p icmp -j ACCEPT
 # Protection against common attacks {{{
 
 # Drop new incoming TCP connections that aren't SYN packets
-iptables -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
-ip6tables -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
+$IPT -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
+$IP6T -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
 
 # Drop incoming malformed XMAS packets
-iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
-ip6tables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
+$IPT -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
+$IP6T -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
 
 # Drop incoming malformed NULL packets
-iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
-ip6tables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
+$IPT -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
+$IP6T -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 
 # }}}
 
