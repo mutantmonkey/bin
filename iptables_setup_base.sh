@@ -116,10 +116,6 @@ iptables -A INPUT -p icmp -j ACCEPT
 iptables -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
 ip6tables -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
 
-# Drop incoming packets with fragments
-iptables -A INPUT -f -j DROP
-#ip6tables -A INPUT -f -j DROP
-
 # Drop incoming malformed XMAS packets
 iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
 ip6tables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP

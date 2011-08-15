@@ -39,7 +39,7 @@ AUTH = auth_resp_dict["Auth"]
 header = {}
 header['Authorization'] = 'GoogleLogin auth=%s' % AUTH
 
-reader_base_url = 'http://www.google.com/reader/api/0/unread-count?%s'
+reader_base_url = 'https://www.google.com/reader/api/0/unread-count?%s'
 reader_req_data = urllib.urlencode({'all': 'true',
                                     'output': 'json'})
 reader_url = reader_base_url % (reader_req_data)
