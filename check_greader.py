@@ -50,12 +50,15 @@ reader_resp = urllib.request.urlopen(reader_req, cafile=cafile)
 
 data = str(reader_resp.read(), encoding='ascii')
 data = json.loads(data)
+count = 0
 if len(data['unreadcounts']) > 0:
     for obj in data['unreadcounts']:
         objid = obj['id'].split('/')
         if 'com.google' in objid and 'reading-list' in objid:
             count = int(obj['count'])
-            print(count, end='')
-else:
-    print(0, end='')
 
+f = open('/dev/shm/greader-mutantmonkey', 'w')
+f.write(str(count))
+f.close()
+
+#print(count)

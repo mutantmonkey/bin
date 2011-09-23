@@ -35,10 +35,10 @@ status, mailboxes = conn.list()
 for mailbox_list_resp in mailboxes:
     flags, delim, mailbox = list_response_regex.match(mailbox_list_resp).groups()
     mailbox = mailbox.strip(b'"')
-    if mailbox in (b'aur', b'bugs', b'cron', b'drafts', b'lists/novalug',
-            b'lists/full-disclosure', b'lists/mappingdc', b'lists/opennic',
-            b'lists/opennic/dns-operations', b'logwatch', b'shopping/deals',
-            b'sent', b'spam'):
+    if mailbox in (b'aur', b'bugs', b'cron', b'drafts', b'lists/cryptography',
+            b'lists/novalug', b'lists/full-disclosure', b'lists/mappingdc',
+            b'lists/opennic', b'lists/opennic/dns-operations', b'logwatch',
+            b'shopping/deals', b'sent', b'spam', b'virginiatech/techsupport'):
         continue
     mbox_status = conn.status(mailbox, '(UNSEEN)')[1][0]
     unread_match = unread_regex.search(mbox_status)
@@ -47,5 +47,8 @@ for mailbox_list_resp in mailboxes:
 
 conn.logout()
 
-print(unread_count, end='')
+f = open('/dev/shm/mail-mutantmonkey', 'w')
+f.write(str(unread_count))
+f.close()
 
+#print(unread_count)
