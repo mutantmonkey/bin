@@ -7,5 +7,10 @@
 
 IF=$1
 IPADDR=$(ip -6 addr show $IF | grep "scope global dynamic" | sed 's/^.*inet6 \(.*\)\/.*$/\1/')
-ip6tables -I INPUT -d $IPADDR -j DROP
-ip6tables -I OUTPUT -s $IPADDR -j DROP
+IP6T=$(which ip6tables)
+
+$IP6T -C INPUT -d $IPADDR -j DROP 2>/dev/null
+[ $? != 0 ] && $IP6T -I INPUT -d $IPADDR -j DROP
+
+$IP6T -C OUTPUT -s $IPADDR -j DROP 2>/dev/null
+[ $? != 0 ] && $IP6T -I OUTPUT -s $IPADDR -j DROP
