@@ -73,7 +73,7 @@ $IP6T -A INPUT -p icmpv6 --icmpv6-type parameter-problem -j ACCEPT
 $IP6T -A INPUT -p icmpv6 --icmpv6-type echo-request -m limit --limit 900/min -j ACCEPT
 $IP6T -A INPUT -p icmpv6 --icmpv6-type echo-reply -m limit --limit 900/min -j ACCEPT
 
-# Drop multicast pings (only useful for detecting alive hosts on a subnet)
+# Drop multicast pings (only useful for enumerating hosts on a subnet)
 $IP6T -A INPUT -p icmpv6 --icmpv6-type echo-request -d ff02::1 -j DROP
 
 # Allow some outbound ICMPv6 packets
@@ -134,4 +134,3 @@ $IP6T -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 /etc/rc.d/ip6tables save
 
 # }}}
-
