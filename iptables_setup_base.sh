@@ -2,14 +2,14 @@
 ################################################################################
 # iptables_setup_base.sh - iptables base setup
 #
-# author: mutantmonkey <mutantmonkey@gmail.com>
+# author: mutantmonkey <mutantmonkey@mutantmonkey.in>
 ################################################################################
 
 IFACE="eth0"
 IPT=$(which iptables)
 IP6T=$(which ip6tables)
 
-# Default rules for when a packet does not match our settings {{{
+# Flush existing rules and set default policies {{{
 $IPT -P INPUT DROP
 $IPT -P FORWARD DROP
 $IPT -P OUTPUT ACCEPT
@@ -21,9 +21,7 @@ $IP6T -P FORWARD DROP
 $IP6T -P OUTPUT ACCEPT
 $IP6T -F
 $IP6T -X
-
 # }}}
-
 
 # Create custom chains {{{
 $IPT -N open
@@ -32,7 +30,6 @@ $IPT -N interfaces
 $IP6T -N open
 $IP6T -N interfaces
 # }}}
-
 
 # INPUT rules {{{
 
@@ -76,6 +73,9 @@ $IP6T -A INPUT -p icmpv6 --icmpv6-type parameter-problem -j ACCEPT
 $IP6T -A INPUT -p icmpv6 --icmpv6-type echo-request -m limit --limit 900/min -j ACCEPT
 $IP6T -A INPUT -p icmpv6 --icmpv6-type echo-reply -m limit --limit 900/min -j ACCEPT
 
+# Drop multicast pings (only useful for enumerating hosts on a subnet)
+$IP6T -A INPUT -p icmpv6 --icmpv6-type echo-request -d ff02::1 -j DROP
+
 # Allow some outbound ICMPv6 packets
 $IP6T -A OUTPUT -p icmpv6 --icmpv6-type destination-unreachable -j ACCEPT
 $IP6T -A OUTPUT -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
@@ -91,7 +91,6 @@ $IP6T -A OUTPUT -p icmpv6 --icmpv6-type router-solicitation -m hl --hl-eq 255 -j
 $IP6T -A INPUT -p icmpv6 -j ACCEPT
 
 # }}}
-
 
 # IPv4 Rules {{{
 
@@ -111,7 +110,6 @@ $IPT -A INPUT -p icmp -j ACCEPT
 
 # }}}
 
-
 # Protection against common attacks {{{
 
 # Drop new incoming TCP connections that aren't SYN packets
@@ -130,11 +128,9 @@ $IP6T -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 
 # }}}
 
-
 # Save rules {{{
 
 /etc/rc.d/iptables save
 /etc/rc.d/ip6tables save
 
 # }}}
-
