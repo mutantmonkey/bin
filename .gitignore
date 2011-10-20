@@ -1,6 +1,5 @@
 egeus/
-fireninja/
 foxtrot/
-latex_to_pdf
+prawn/
 update_userscripts.sh
 vt_root_ca.sh

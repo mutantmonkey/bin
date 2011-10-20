@@ -1,56 +1,54 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 #################################################################################
 # check_mail.py - Check unread messages in all IMAP mailboxes
 # based on http://www.doughellmann.com/PyMOTW/imaplib/
 #
 # author: Wade Duvall <wsduvall@amenrecluster.com>
 # author: Doug Hellmann
-# author: mutantmonkey <mutantmonkey@gmail.com>
+# author: mutantmonkey <mutantmonkey@mutantmonkey.in>
 ################################################################################
 
-import keyring
 import imaplib
+import netrc
 import re
 
 server = 'cubensis.mutantmonkey.in'
-port = 993
+port = 143
 
-username = 'mutantmonkey@mutantmonkey.in'
-password = keyring.get_password(server, username)
+# get login info
+nrc = netrc.netrc()
+auth = nrc.authenticators(server)
+username = auth[0]
+password = auth[2]
 
+list_response_regex = re.compile(b'\((?P<flags>.*?)\) "(?P<delimiter>.*)" (?P<name>.*)')
+unread_regex = re.compile(b"UNSEEN (\d+)")
 unread_count = 0
 
-list_response_regex = re.compile(r'\((?P<flags>.*?)\) "(?P<delimiter>.*)" (?P<name>.*)')
-unread_regex = re.compile("UNSEEN (\d+)")
-
-def store_password():
-	import getpass
-
-	password = getpass.getpass("Password for %s@%s: " % (username, server))
-	keyring.set_password(server, username, password)
-
-if not password:
-	store_password()
-
 # connect to server and login
-conn = imaplib.IMAP4_SSL(server, port)
+conn = imaplib.IMAP4(server, port)
+conn.starttls()
 conn.login(username, password)
 
 status, mailboxes = conn.list()
 
 for mailbox_list_resp in mailboxes:
-	flags, delim, mailbox = list_response_regex.match(mailbox_list_resp).groups()
-	mailbox = mailbox.strip('"')
-	if mailbox in ('aur', 'bugs', 'cron', 'drafts', 'lists/novalug',
-			'lists/full-disclosure', 'lists/mappingdc',
-			'logwatch', 'shopping/deals', 'sent', 'spam'):
-		continue
-	mbox_status = conn.status(mailbox, '(UNSEEN)')[1][0]
-	unread_match = unread_regex.search(mbox_status)
-	if unread_match:
-		unread_count += int(unread_match.group(1))
+    flags, delim, mailbox = list_response_regex.match(mailbox_list_resp).groups()
+    mailbox = mailbox.strip(b'"')
+    if mailbox in (b'aur', b'bugs', b'cron', b'drafts', b'lists/cryptography',
+            b'lists/novalug', b'lists/full-disclosure', b'lists/mappingdc',
+            b'lists/opennic', b'lists/opennic/dns-operations', b'logwatch',
+            b'shopping/deals', b'sent', b'spam', b'virginiatech/techsupport'):
+        continue
+    mbox_status = conn.status(mailbox, '(UNSEEN)')[1][0]
+    unread_match = unread_regex.search(mbox_status)
+    if unread_match:
+        unread_count += int(unread_match.group(1))
 
 conn.logout()
 
-print unread_count
+f = open('/dev/shm/mail-mutantmonkey', 'w')
+f.write(str(unread_count))
+f.close()
 
+#print(unread_count)

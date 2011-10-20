@@ -3,7 +3,7 @@
 # check_gmail.py - Check unread messages in Gmail Inbox using IMAP
 #
 # author: Wade Duvall <wsduvall@amenrecluster.com>
-# author: mutantmonkey <mutantmonkey@gmail.com>
+# author: mutantmonkey <mutantmonkey@mutantmonkey.in>
 ################################################################################
 
 import keyring

@@ -14,7 +14,7 @@ fi
 
 #TERMI='urxvt -e bash -lic'
 TERMI='roxterm -e'
-CACHE="$HOME/.dmenu_cache_recent"
+CACHE="$HOME/.cache/dmenu_recent"
 
 touch $CACHE
 MOST_USED=$(LC_ALL="C"; sort $CACHE | uniq -c | sort -nr | colrm 1 8)
