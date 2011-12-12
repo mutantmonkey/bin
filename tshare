@@ -1,0 +1,17 @@
+#!/bin/sh
+################################################################################
+# tshare - Tahoe-LAFS uploader
+#
+# author: mutantmonkey <mutantmonkey@mutantmonkey.in>
+################################################################################
+
+filename=$(basename "$1")
+if [ ! -f "$1" ]; then
+    echo "Please specify a filename on the command line."
+    exit 1
+fi
+
+filecap=$(tahoe put "$1" | tail -1)
+echo "${filecap}"
+curl -d "filecap=${filecap}&filename=${filename}" http://tahoe.vtluug.org/publish
+echo ""

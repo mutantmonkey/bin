@@ -1,0 +1,13 @@
+#!/bin/sh
+################################################################################
+# linx - linx.li uploader
+#
+# author: mutantmonkey <mutantmonkey@mutantmonkey.in>
+################################################################################
+
+if [ ! -f "$1" ]; then
+    echo "Please specify a filename on the command line."
+    exit 1
+fi
+
+curl -i --form file=@$1 http://linx.li/uploader/html | grep Location | sed 's/Location: \(.*\)/\1/'
