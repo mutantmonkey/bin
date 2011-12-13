@@ -5,13 +5,15 @@
 # author: mutantmonkey <mutantmonkey@mutantmonkey.in>
 ################################################################################
 
-filename=$(basename "$1")
-if [ ! -f "$1" ]; then
-    echo "Please specify a filename on the command line."
-    exit 1
-fi
+for ARG in "$@"; do
+    if [ ! -f "$ARG" ]; then
+        echo "$ARG: file does not exist"
+        continue
+    fi
 
-filecap=$(tahoe put "$1" | tail -1)
-echo "${filecap}"
-curl -d "filecap=${filecap}&filename=${filename}" http://tahoe.vtluug.org/publish
-echo ""
+    filename=$(basename "$ARG")
+    filecap=$(tahoe put "$ARG" | tail -1)
+    echo "${filecap}"
+    URL=$(curl -s -d "filecap=${filecap}&filename=${filename}" http://tahoe.vtluug.org/publish)
+    echo $URL
+done
