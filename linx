@@ -5,11 +5,6 @@
 # author: mutantmonkey <mutantmonkey@mutantmonkey.in>
 ################################################################################
 
-#if [ ! -f "$1" ]; then
-#    echo "Please specify a filename on the command line."
-#    exit 1
-#fi
-
 for ARG in "$@"; do
     if [ ! -f "$ARG" ]; then
         echo "$ARG: file does not exist"
