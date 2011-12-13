@@ -1,1 +1,0 @@
-/media/stuff/code/hokiestalker/hs.py
