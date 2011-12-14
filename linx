@@ -11,6 +11,6 @@ for ARG in "$@"; do
         continue
     fi
 
-    URL=$(curl -s -F "Filedata=@$ARG" http://linx.li/uploader/public)
-    echo $URL
+    URL=$(curl -s -F "Filedata=@$ARG" https://linx.li/uploader/public)
+    echo ${URL/https/http}
 done
