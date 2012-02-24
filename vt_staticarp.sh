@@ -8,7 +8,7 @@
 IF=$1
 
 function add_arp {
-    route=$(ip route get $1 | head -n1 | awk '{print $3}')
+    route=$(ip route get 8.8.8.8 | head -n1 | awk '{print $3}')
     if [ "$route" == "$1" ]; then
         arp -s $1 $2
     fi
