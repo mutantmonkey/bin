@@ -45,11 +45,11 @@ $IP6T -A INPUT -j interfaces
 $IP6T -A INPUT -j open
 
 # Specific deny cases for TCP and UDP packets
-$IPT -A INPUT -p tcp -j REJECT --reject-with tcp-reset
-$IPT -A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
+#$IPT -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+#$IPT -A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
 
-$IP6T -A INPUT -p tcp -j REJECT --reject-with tcp-reset
-$IP6T -A INPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
+#$IP6T -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+#$IP6T -A INPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
 
 # Accept all traffic from trusted interfaces
 $IPT -A interfaces -i lo -j ACCEPT
@@ -125,12 +125,5 @@ $IPT -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 $IP6T -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 
 # }}}
-
-# }}}
-
-# Save rules {{{
-
-/etc/rc.d/iptables save
-/etc/rc.d/ip6tables save
 
 # }}}
