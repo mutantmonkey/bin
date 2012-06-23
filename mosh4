@@ -1,0 +1,2 @@
+#!/bin/sh
+mosh $(dig +short $1 a)
