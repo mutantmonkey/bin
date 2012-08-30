@@ -2,16 +2,14 @@
 ################################################################################
 # start_tmux.sh - tmux start script
 #
-# author: mutantmonkey <mutantmonkey@gmail.com>
+# author: mutantmonkey <mutantmonkey@mutantmonkey.in>
 ################################################################################
 
-tmux new  -d -s0 -nirc 'exec ssh cubensis.mutantmonkey.in'
+tmux -u new -d -s0 -nirc
 tmux neww -d -nmutt
-tmux neww -d -nranger 'exec ranger'
+tmux neww -d -ntask
 tmux neww -d -nncmpcpp 'exec ncmpcpp'
-tmux neww -d
-tmux neww -d
+tmux neww -d -ncanto
 
-tmux new -d -smutt -t0
-tmux new -d -sncmpcpp -t0
-
+tmux -u new -d -smutt -t0
+tmux -u new -d -sncmpcpp -t0
