@@ -34,8 +34,8 @@ $IP6T -N interfaces
 # INPUT rules {{{
 
 # Accept all packets belonging to established connections
-$IPT -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-$IP6T -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+$IPT -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+$IP6T -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
 # Add rule for our custom chains
 $IPT -A INPUT -j interfaces
@@ -113,8 +113,8 @@ $IPT -A INPUT -p icmp -j ACCEPT
 # Protection against common attacks {{{
 
 # Drop new incoming TCP connections that aren't SYN packets
-$IPT -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
-$IP6T -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
+$IPT -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
+$IP6T -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
 
 # Drop incoming malformed XMAS packets
 $IPT -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
