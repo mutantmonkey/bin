@@ -1,16 +1,74 @@
-#!/bin/sh
+#!/usr/bin/python3
 ################################################################################
-# linx - linx.li uploader
+# linx - python uploader for linx.li
 #
 # author: mutantmonkey <mutantmonkey@mutantmonkey.in>
 ################################################################################
 
-for ARG in "$@"; do
-    if [ ! -f "$ARG" ]; then
-        echo "$ARG: file does not exist"
-        continue
-    fi
+import argparse
+import json
+import sys
+import os.path
+import urllib.error
+import urllib.parse
+import urllib.request
 
-    URL=$(curl -s -F "Filedata=@$ARG" https://linx.li/upload/public)
-    echo $URL
-done
+
+logpath = os.path.expanduser('~/.local/share/linx.log')
+command = os.path.basename(sys.argv[0])
+
+if command == 'unlinx':
+    parser = argparse.ArgumentParser(description="Remove files that are in the log from linx.li.")
+    parser.add_argument('urls', nargs='+')
+    args = parser.parse_args()
+
+    delete_keys = {}
+    with open(logpath) as f:
+        for line in f:
+            line = line.split(':')
+            delete_keys[line[0]] = line[1]
+
+    for url in args.urls:
+        filename = os.path.basename(url)
+        if not filename in delete_keys:
+            raise Exception("File does not exist in log.")
+
+        req = urllib.request.Request(url)
+        req.add_header('X-Delete-Key', delete_keys[filename])
+        req.get_method = lambda: 'DELETE'
+
+        try:
+            r = urllib.request.urlopen(req)
+            print("{filename}:{resp}".format(filename=filename,
+                    resp=r.read().decode('utf-8')))
+        except urllib.error.HTTPError as e:
+            print("{filename}:{errormsg}".format(filename=filename, errormsg=str(e)))
+else:
+    logfile = open(logpath, 'a')
+
+    
+    parser = argparse.ArgumentParser(description="Upload files to linx.li.")
+    parser.add_argument('--expires', '-e', type=int, default=0)
+    parser.add_argument('files', nargs='+')
+    args = parser.parse_args()
+
+    if args.files:
+        for filename in args.files:
+            basename = os.path.basename(filename)
+
+            with open(filename, 'rb') as f:
+                req = urllib.request.Request('https://linx.li/upload/public/' +
+                        urllib.parse.quote(basename), data=f.read())
+                req.add_header('Accept', 'application/json')
+                req.add_header('X-File-Expiry', args.expires)
+                req.add_header('X-Randomized-Barename', 'true')
+                req.get_method = lambda: 'PUT'
+
+                r = urllib.request.urlopen(req)
+                data = json.loads(r.read().decode('utf-8'))
+                print(data['url'])
+                #print('Delete key: ' + data['delete_key'])
+                logfile.write("{filename}:{delete_key}\n".format(**data))
+    else:
+        print("bin.gg is not supported yet")
+        # TODO: implement
