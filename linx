@@ -33,9 +33,8 @@ if command == 'unlinx':
         if not filename in delete_keys:
             raise Exception("File does not exist in log.")
 
-        req = urllib.request.Request(url)
+        req = urllib.request.Request(url, method='DELETE')
         req.add_header('X-Delete-Key', delete_keys[filename])
-        req.get_method = lambda: 'DELETE'
 
         try:
             r = urllib.request.urlopen(req)
@@ -58,11 +57,10 @@ else:
 
             with open(filename, 'rb') as f:
                 req = urllib.request.Request('https://linx.li/upload/public/' +
-                        urllib.parse.quote(basename), data=f.read())
+                        urllib.parse.quote(basename), method='PUT', data=f.read())
                 req.add_header('Accept', 'application/json')
                 req.add_header('X-File-Expiry', args.expires)
                 req.add_header('X-Randomized-Barename', 'true')
-                req.get_method = lambda: 'PUT'
 
                 r = urllib.request.urlopen(req)
                 data = json.loads(r.read().decode('utf-8'))
