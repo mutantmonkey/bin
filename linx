@@ -48,7 +48,7 @@ else:
     
     parser = argparse.ArgumentParser(description="Upload files to linx.li.")
     parser.add_argument('--expires', '-e', type=int, default=0)
-    parser.add_argument('files', nargs='+')
+    parser.add_argument('files', nargs='*')
     args = parser.parse_args()
 
     if args.files:
@@ -65,8 +65,16 @@ else:
                 r = urllib.request.urlopen(req)
                 data = json.loads(r.read().decode('utf-8'))
                 print(data['url'])
-                #print('Delete key: ' + data['delete_key'])
                 logfile.write("{filename}:{delete_key}\n".format(**data))
     else:
-        print("bin.gg is not supported yet")
-        # TODO: implement
+        data = sys.stdin.read().encode('utf-8')
+        req = urllib.request.Request('https://linx.li/upload/public',
+                method='PUT', data=data)
+        req.add_header('Accept', 'application/json')
+        req.add_header('X-File-Expiry', args.expires)
+
+        r = urllib.request.urlopen(req)
+        data = json.loads(r.read().decode('utf-8'))
+        print(data['url'])
+        logfile.write("{filename}:{delete_key}\n".format(**data))
+
