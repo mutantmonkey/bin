@@ -19,7 +19,7 @@ command = os.path.basename(sys.argv[0])
 
 if command == 'unlinx':
     parser = argparse.ArgumentParser(description="Remove files that are in the log from linx.li.")
-    parser.add_argument('urls', nargs='+')
+    parser.add_argument('urls', nargs='+', metavar='url')
     args = parser.parse_args()
 
     delete_keys = {}
@@ -47,8 +47,9 @@ else:
 
     
     parser = argparse.ArgumentParser(description="Upload files to linx.li.")
-    parser.add_argument('--expires', '-e', type=int, default=0)
-    parser.add_argument('files', nargs='*')
+    parser.add_argument('-e', '--expires', type=int, default=0,
+            help="The relative expiration time (in seconds) of the file.")
+    parser.add_argument('files', nargs='*', metavar='file')
     args = parser.parse_args()
 
     if args.files:
