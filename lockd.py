@@ -1,4 +1,9 @@
 #!/usr/bin/python3
+################################################################################
+# lockd.py - lock screen using i3lock on org.freedesktop.login1.Session.Lock
+#
+# author: mutantmonkey <mutantmonkey@mutantmonkey.in>
+################################################################################
 
 import dbus
 import subprocess
