@@ -17,8 +17,13 @@ import urllib.request
 logpath = os.path.expanduser('~/.local/share/linx.log')
 command = os.path.basename(sys.argv[0])
 
+opener = urllib.request.build_opener()
+opener.addheaders = [('User-Agent', "pylinx/20130206")]
+urllib.request.install_opener(opener)
+
 if command == 'unlinx':
-    parser = argparse.ArgumentParser(description="Remove files that are in the log from linx.li.")
+    parser = argparse.ArgumentParser(
+            description="Remove files that are in the log from linx.li.")
     parser.add_argument('urls', nargs='+', metavar='url')
     args = parser.parse_args()
 
@@ -41,7 +46,8 @@ if command == 'unlinx':
             print("{filename}:{resp}".format(filename=filename,
                     resp=r.read().decode('utf-8')))
         except urllib.error.HTTPError as e:
-            print("{filename}:{errormsg}".format(filename=filename, errormsg=str(e)))
+            print("{filename}:{errormsg}".format(filename=filename,
+                errormsg=str(e)))
 else:
     logfile = open(logpath, 'a')
 
