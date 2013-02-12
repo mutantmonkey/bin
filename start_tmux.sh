@@ -6,10 +6,9 @@
 ################################################################################
 
 tmux -u new -d -s0 -nirc
-tmux neww -d -nmutt
-tmux neww -d -ntask
-tmux neww -d -nncmpcpp
-tmux neww -d -ncanto
+tmux neww -d -t2 -nmutt
+tmux neww -d -t3 -ntask
+tmux neww -d -t4 -nncmpcpp
 
 tmux -u new -d -smutt -t0
 tmux -u new -d -sncmpcpp -t0
