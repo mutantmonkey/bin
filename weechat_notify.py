@@ -13,7 +13,7 @@ import yaml
 from gi.repository import Notify
 
 
-Notify.init("Weechat Notifications")
+Notify.init("weechat")
 
 config = yaml.safe_load(open(os.path.expanduser('~/.config/weechat/config.yaml')))
 connection = pika.BlockingConnection(pika.connection.URLParameters(
@@ -33,7 +33,6 @@ def handle_notify(ch, method, properties, body):
                 channel=data[':channel']),
             data[':message'], 'dialog-information')
     n.show()
-    #print(data)
 
 channel.basic_consume(handle_notify, queue=queue_name, no_ack=True)
 channel.start_consuming()
