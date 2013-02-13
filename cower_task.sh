@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pkgs=$(cower -bu --ignorerepo=mutantmonkey | sed 's/^:: \([A-Za-z0-9\-]*\) .*$/\1/')
+pkgs=$(cower -bu --ignorerepo=mutantmonkey | sed 's/^:: \([A-Za-z0-9\.\-]*\) .*$/\1/')
 for pkg in $pkgs; do
     description="Update package: $pkg"
 
