@@ -15,7 +15,7 @@ from gi.repository import Notify
 
 Notify.init("weechat")
 
-config = yaml.safe_load(open(os.path.expanduser('~/.config/weechat/config.yaml')))
+config = yaml.safe_load(open(os.path.expanduser('~/.config/weechat/config.yml')))
 connection = pika.BlockingConnection(pika.connection.URLParameters(
     config['rabbitmq']['uri']))
 channel = connection.channel()
