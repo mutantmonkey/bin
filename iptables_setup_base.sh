@@ -82,11 +82,6 @@ $IP6T -A OUTPUT -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
 $IP6T -A OUTPUT -p icmpv6 --icmpv6-type time-exceeded -j ACCEPT
 $IP6T -A OUTPUT -p icmpv6 --icmpv6-type parameter-problem -j ACCEPT
 
-# Limit NDP messages to local network
-$IP6T -A OUTPUT -p icmpv6 --icmpv6-type neighbour-solicitation -m hl --hl-eq 255 -j ACCEPT
-$IP6T -A OUTPUT -p icmpv6 --icmpv6-type neighbour-advertisement -m hl --hl-eq 255 -j ACCEPT
-$IP6T -A OUTPUT -p icmpv6 --icmpv6-type router-solicitation -m hl --hl-eq 255 -j ACCEPT
-
 # Accept all other inbound ICMPv6 packets
 $IP6T -A INPUT -p icmpv6 -j ACCEPT
 
