@@ -7,19 +7,33 @@
 
 import argparse
 import json
-import sys
 import os.path
-import urllib.error
+import requests
+import sys
 import urllib.parse
-import urllib.request
 
 
 logpath = os.path.expanduser('~/.local/share/linx.log')
 command = os.path.basename(sys.argv[0])
 
-opener = urllib.request.build_opener()
-opener.addheaders = [('User-Agent', "pylinx/20130206")]
-urllib.request.install_opener(opener)
+user_agent = "pylinx/20130616"
+upload_path = 'https://linx.li/upload/public/'
+
+
+def stream_upload(f, total, label="", chunk_size=64*1024):
+    while True:
+        data = f.read(chunk_size)
+        if not data:
+            sys.stdout.write("\r")
+            sys.stdout.flush()
+            break
+
+        yield data
+        sys.stdout.write("\r{label:40} {progress:7.2%}".format(
+            label=label[-40:],
+            progress=f.tell() / total))
+        sys.stdout.flush()
+
 
 if command == 'unlinx':
     parser = argparse.ArgumentParser(
@@ -38,20 +52,23 @@ if command == 'unlinx':
         if not filename in delete_keys:
             raise Exception("File does not exist in log.")
 
-        req = urllib.request.Request(url, method='DELETE')
-        req.add_header('X-Delete-Key', delete_keys[filename])
+        r = requests.delete(
+            url,
+            verify=True,
+            headers={
+                'X-Delete-Key': delete_keys[filename],
+                'User-Agent': user_agent,
+            })
 
-        try:
-            r = urllib.request.urlopen(req)
+        if r.status_code == 200:
             print("{filename}:{resp}".format(filename=filename,
-                    resp=r.read().decode('utf-8')))
-        except urllib.error.HTTPError as e:
+                    resp=r.text))
+        else:
             print("{filename}:{errormsg}".format(filename=filename,
-                errormsg=str(e)))
+                errormsg=r.status_code))
 else:
     logfile = open(logpath, 'a')
 
-    
     parser = argparse.ArgumentParser(description="Upload files to linx.li.")
     parser.add_argument('-e', '--expires', type=int, default=0,
             help="The relative expiration time (in seconds) of the file.")
@@ -61,27 +78,40 @@ else:
     if args.files:
         for filename in args.files:
             basename = os.path.basename(filename)
+            total = os.path.getsize(filename)
 
             with open(filename, 'rb') as f:
-                req = urllib.request.Request('https://linx.li/upload/public/' +
-                        urllib.parse.quote(basename), method='PUT', data=f.read())
-                req.add_header('Accept', 'application/json')
-                req.add_header('X-File-Expiry', args.expires)
-                req.add_header('X-Randomized-Barename', 'true')
+                try:
+                    r = requests.put(
+                        upload_path + urllib.parse.quote(basename),
+                        verify=True,
+                        headers={
+                            'Accept': "application/json",
+                            'X-File-Expiry': args.expires,
+                            'X-Randomized-Barename': True,
+                            'User-Agent': user_agent,
+                        },
+                        data=stream_upload(f, total, label=basename))
+                except KeyboardInterrupt:
+                    raise SystemExit
 
-                r = urllib.request.urlopen(req)
-                data = json.loads(r.read().decode('utf-8'))
+                data = json.loads(r.text)
                 print(data['url'])
                 logfile.write("{filename}:{delete_key}\n".format(**data))
     else:
-        data = sys.stdin.read().encode('utf-8')
-        req = urllib.request.Request('https://linx.li/upload/public',
-                method='PUT', data=data)
-        req.add_header('Accept', 'application/json')
-        req.add_header('X-File-Expiry', args.expires)
+        try:
+            r = requests.put(
+                upload_path,
+                verify=True,
+                headers={
+                    'Accept': "application/json",
+                    'X-File-Expiry': args.expires,
+                    'User-Agent': user_agent,
+                },
+                data=sys.stdin.read().encode('utf-8'))
+        except KeyboardInterrupt:
+            raise SystemExit
 
-        r = urllib.request.urlopen(req)
-        data = json.loads(r.read().decode('utf-8'))
+        data = json.loads(r.text)
         print(data['url'])
         logfile.write("{filename}:{delete_key}\n".format(**data))
-
