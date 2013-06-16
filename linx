@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-################################################################################
+###############################################################################
 # linx - python uploader for linx.li
 #
 # author: mutantmonkey <mutantmonkey@mutantmonkey.in>
-################################################################################
+###############################################################################
 
 import argparse
 import json
@@ -37,7 +37,7 @@ def stream_upload(f, total, label="", chunk_size=64*1024):
 
 if command == 'unlinx':
     parser = argparse.ArgumentParser(
-            description="Remove files that are in the log from linx.li.")
+        description="Remove files that are in the log from linx.li.")
     parser.add_argument('urls', nargs='+', metavar='url')
     args = parser.parse_args()
 
@@ -61,17 +61,23 @@ if command == 'unlinx':
             })
 
         if r.status_code == 200:
-            print("{filename}:{resp}".format(filename=filename,
-                    resp=r.text))
+            print("{filename}:{resp}".format(
+                filename=filename,
+                resp=r.text))
         else:
-            print("{filename}:{errormsg}".format(filename=filename,
+            print("{filename}:{errormsg}".format(
+                filename=filename,
                 errormsg=r.status_code))
 else:
     logfile = open(logpath, 'a')
 
     parser = argparse.ArgumentParser(description="Upload files to linx.li.")
-    parser.add_argument('-e', '--expires', type=int, default=0,
-            help="The relative expiration time (in seconds) of the file.")
+    parser.add_argument(
+        '-e',
+        '--expires',
+        type=int,
+        default=0,
+        help="The relative expiration time (in seconds) of the file.")
     parser.add_argument('files', nargs='*', metavar='file')
     args = parser.parse_args()
 
