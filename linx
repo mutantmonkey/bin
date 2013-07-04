@@ -25,6 +25,8 @@ def stream_upload(f, total, label="", chunk_size=64*1024):
         data = f.read(chunk_size)
         if not data:
             sys.stdout.write("\r")
+            sys.stdout.write(''.join([' ' for x in label]))
+            sys.stdout.write("\r")
             sys.stdout.flush()
             break
 
