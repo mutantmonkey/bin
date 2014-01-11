@@ -1,0 +1,10 @@
+#!/bin/sh
+###############################################################################
+# appvm - use spicy to view VMs
+#
+# author: mutantmonkey <mutantmonkey@mutantmonkey.in>
+###############################################################################
+
+DOMAIN=$1
+URI=$(virsh domdisplay "$DOMAIN")
+/usr/bin/spicy --title="$DOMAIN" --uri="$URI"
