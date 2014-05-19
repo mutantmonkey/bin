@@ -95,10 +95,10 @@ $IPT -A INPUT -p icmp --icmp-type echo-reply -m limit --limit 900/min -j ACCEPT
 
 # Drop ICMP packets that we don't care about
 $IPT -I INPUT -p icmp --icmp-type redirect -j DROP
-$IPT -I INPUT -p icmp --icmp-type router-advertisement -j DROP
-$IPT -I INPUT -p icmp --icmp-type router-solicitation -j DROP
-$IPT -I INPUT -p icmp --icmp-type address-mask-request -j DROP
-$IPT -I INPUT -p icmp --icmp-type address-mask-reply -j DROP
+#$IPT -I INPUT -p icmp --icmp-type router-advertisement -j DROP
+#$IPT -I INPUT -p icmp --icmp-type router-solicitation -j DROP
+#$IPT -I INPUT -p icmp --icmp-type address-mask-request -j DROP
+#$IPT -I INPUT -p icmp --icmp-type address-mask-reply -j DROP
 
 # Accept all inbound ICMP packets
 $IPT -A INPUT -p icmp -j ACCEPT
