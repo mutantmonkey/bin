@@ -7,6 +7,7 @@
 
 import dbus
 import subprocess
+import threading
 from gi.repository import GObject
 from gi.repository import Notify
 from dbus.mainloop.glib import DBusGMainLoop
@@ -14,24 +15,26 @@ from dbus.mainloop.glib import DBusGMainLoop
 Notify.init(__name__)
 
 
+class LockThread(threading.Thread):
+    def run(self):
+        # pause all notifications
+        n = Notify.Notification.new("DUNST_COMMAND_PAUSE", None, None)
+        n.show()
+
+        subprocess.call(["i3lock", "-c", "000000", '--nofork'])
+
+        # resume notifications
+        n = Notify.Notification.new("DUNST_COMMAND_RESUME", None, None)
+        n.show()
+
+
 def lock(*args):
-    # pause all notifications
-    n = Notify.Notification.new("DUNST_COMMAND_PAUSE", None, None)
-    n.show()
-
-    subprocess.call(["i3lock", "-c", "000000", '--nofork'])
-
-    # resume notifications
-    n = Notify.Notification.new("DUNST_COMMAND_RESUME", None, None)
-    n.show()
+    t = LockThread()
+    t.start()
 
 
 def unlock(*args):
-    subprocess.call(['killall', 'i3lock'])
-
-    # resume notifications
-    n = Notify.Notification.new("DUNST_COMMAND_RESUME", None, None)
-    n.show()
+    subprocess.call(['pkill', 'i3lock'])
 
 
 if __name__ == "__main__":
