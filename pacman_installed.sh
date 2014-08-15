@@ -1,8 +1,6 @@
 #!/bin/sh
 ################################################################################
 # pacman_installed.sh - Print installed Pacman packages
-#
-# author: mutantmonkey <mutantmonkey@gmail.com>
 ################################################################################
 
 IFS='
