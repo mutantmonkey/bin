@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/zsh
 
 pkgs=$(cower -bu | sed 's/^:: \([A-Za-z0-9\.\-]*\) .*$/\1/')
 for pkg in $pkgs; do

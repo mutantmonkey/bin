@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/zsh
 ################################################################################
 # block_eui64.sh - block all traffic on EUI-64 generated address
 #

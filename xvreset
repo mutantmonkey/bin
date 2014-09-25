@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/zsh
 { xvattr -a XV_BRIGHTNESS -v 0 ;
   xvattr -a XV_CONTRAST -v 0 ;
   xvattr -a XV_SATURATION -v 0 ;
