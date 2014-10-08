@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-pkgs=$(cower -bu | sed 's/^:: \([A-Za-z0-9\.\-]*\) .*$/\1/')
+IFS=$'\n' pkgs=($(cower -bu | sed -r 's/^:: (\S+) .*$/\1/'))
 for pkg in $pkgs; do
     description="Update package: $pkg"
 
