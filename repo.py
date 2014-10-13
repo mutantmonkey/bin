@@ -78,6 +78,8 @@ if __name__ == '__main__':
     group.add_argument('--list-orphaned', '-o', action='store_true')
     group.add_argument('--list-packages', '-l', action='store_true')
     group.add_argument('--list-uninstalled', '-u', action='store_true')
+    parser.add_argument('--pkgonly', action='store_true',
+                        help="Do not include version in package lists")
     parser.add_argument('repo')
 
     args = parser.parse_args()
@@ -86,7 +88,13 @@ if __name__ == '__main__':
         print_orphaned(args.repo)
     elif args.list_packages:
         for pkg in sorted(list_packages(args.repo)):
-            print(pkg)
+            if args.pkgonly:
+                print(pkg.name)
+            else:
+                print(pkg)
     elif args.list_uninstalled:
         for pkg in sorted(list_packages(args.repo) - list_installed()):
-            print(pkg)
+            if args.pkgonly:
+                print(pkg.name)
+            else:
+                print(pkg)
