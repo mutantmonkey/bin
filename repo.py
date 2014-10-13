@@ -2,7 +2,6 @@
 
 import argparse
 import glob
-import os.path
 import pyalpm
 import requests
 import sys
