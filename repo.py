@@ -5,19 +5,18 @@ import glob
 import os.path
 import pyalpm
 import requests
-import subprocess
 import sys
 import tarfile
 
 
 class Package(object):
-    def __init__(self, name, ver=None):
-        if ver is not None:
+    def __init__(self, name, version=None):
+        if version is not None:
             self.name = name
-            self.ver = ver
+            self.version = version
         else:
             self.name = name[0]
-            self.ver = name[1]
+            self.version = name[1]
 
     def __lt__(self, other):
         # FIXME: also compare version
@@ -31,10 +30,10 @@ class Package(object):
         return hash(self) == hash(other)
 
     def __hash__(self):
-        return hash((self.name, self.ver))
+        return hash((self.name, self.version))
 
     def __repr__(self):
-        return "{name} {ver}".format(name=self.name, ver=self.ver)
+        return "{name} {version}".format(name=self.name, version=self.version)
 
 
 def list_packages(repo):
@@ -60,17 +59,12 @@ def print_orphaned(repo):
             print(f)
 
 
-def list_installed():
+def list_installed(path):
     pkgs = set()
-    # TODO: consider using pyalpm instead of pacman directly
-    out = subprocess.check_output(['/usr/bin/pacman', '-Qn']).decode('utf-8')
-    for line in out.splitlines():
-        if line[0] == ' ':
-            continue
-
-        line = line.split(' ', 1)
-        line += line.pop().split('-', 1)
-        pkgs.add(Package(line))
+    h = pyalpm.Handle(path, path)
+    db = h.get_localdb()
+    for pkg in db.pkgcache:
+        pkgs.add(Package(pkg.name, pkg.version))
 
     return pkgs
 
@@ -91,7 +85,7 @@ def check_updates(repo, batch=False):
 
         for aurpkg in data['results']:
             pkg = pkg_map[aurpkg['Name']]
-            if pyalpm.vercmp(aurpkg['Version'], pkg.ver) > 0:
+            if pyalpm.vercmp(aurpkg['Version'], pkg.version) > 0:
                 yield pkg, aurpkg['Version']
     else:
         for pkg in all_pkgs:
@@ -101,7 +95,7 @@ def check_updates(repo, batch=False):
             data = r.json()
             if type(data['results']) == dict:
                 aur_version = data['results']['Version']
-                if pyalpm.vercmp(aur_version, pkg.ver) > 0:
+                if pyalpm.vercmp(aur_version, pkg.version) > 0:
                     yield pkg, aur_version
             else:
                 print("warning: {} is not in the AUR".format(pkg.name),
@@ -115,8 +109,13 @@ if __name__ == '__main__':
     group.add_argument('--list-packages', '-l', action='store_true')
     group.add_argument('--list-uninstalled', '-u', action='store_true')
     group.add_argument('--check-updates', action='store_true')
+    parser.add_argument(
+        '--dbpath', '-b',
+        type=str,
+        default='/var/lib/pacman',
+        help="Specify an alternative pacman database location.")
     parser.add_argument('--pkgonly', action='store_true',
-                        help="Do not include version in package lists")
+                        help="Do not include version in package lists.")
     parser.add_argument('repo')
 
     args = parser.parse_args()
@@ -130,12 +129,13 @@ if __name__ == '__main__':
             else:
                 print(pkg)
     elif args.list_uninstalled:
-        for pkg in sorted(list_packages(args.repo) - list_installed()):
+        for pkg in sorted(list_packages(args.repo) -
+                          list_installed(args.dbpath)):
             if args.pkgonly:
                 print(pkg.name)
             else:
                 print(pkg)
     elif args.check_updates:
-        for pkg, ver in check_updates(args.repo):
+        for pkg, version in check_updates(args.repo):
             # emulate the cower -b format to allow for parsing by other scripts
-            print(":: {pkg} -> {ver}".format(pkg=pkg, ver=ver))
+            print(":: {pkg} -> {version}".format(pkg=pkg, version=version))
