@@ -58,9 +58,9 @@ def print_orphaned(repo):
             print(f)
 
 
-def list_installed(path):
+def list_installed(dbpath):
     pkgs = set()
-    h = pyalpm.Handle(path, path)
+    h = pyalpm.Handle('/', dbpath)
     db = h.get_localdb()
     for pkg in db.pkgcache:
         pkgs.add(Package(pkg.name, pkg.version))
