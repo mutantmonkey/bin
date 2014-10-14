@@ -104,18 +104,22 @@ def check_updates(repo, batch=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Arch repository helper")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--list-orphaned', '-o', action='store_true')
-    group.add_argument('--list-packages', '-l', action='store_true')
-    group.add_argument('--list-uninstalled', '-u', action='store_true')
-    group.add_argument('--check-updates', action='store_true')
-    parser.add_argument(
-        '--dbpath', '-b',
-        type=str,
-        default='/var/lib/pacman',
-        help="Specify an alternative pacman database location.")
+    group.add_argument('--list-orphaned', '-o', action='store_true',
+                       help="list files that look like packages in the "\
+                            "current directory that are not found in the "\
+                            "repository database")
+    group.add_argument('--list-packages', '-l', action='store_true',
+                       help="list packages in the repository")
+    group.add_argument('--list-uninstalled', '-u', action='store_true',
+                       help="list packages in the repository that are not "\
+                            "installed on the local system")
+    group.add_argument('--check-updates', action='store_true',
+                       help="check packages in the repository for updates")
+    parser.add_argument('--dbpath', '-b', type=str, default='/var/lib/pacman',
+                        help="specify an alternative pacman database location")
     parser.add_argument('--pkgonly', action='store_true',
-                        help="Do not include version in package lists.")
-    parser.add_argument('repo')
+                        help="do not include version in package lists")
+    parser.add_argument('repo', help="path to repository database file")
 
     args = parser.parse_args()
 
