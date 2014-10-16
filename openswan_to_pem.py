@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-import base64
-import binascii
 from Crypto.PublicKey import RSA
 
 comps = {}
