@@ -1,5 +1,7 @@
-egeus/
-foxtrot/
-prawn/
-update_userscripts.sh
-vt_root_ca.sh
+*.pyc
+*.pyo
+*.swo
+*.swp
+*~
+.DS_Store
+__pycache__
