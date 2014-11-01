@@ -105,13 +105,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Arch repository helper")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--list-orphaned', '-o', action='store_true',
-                       help="list files that look like packages in the "\
-                            "current directory that are not found in the "\
+                       help="list files that look like packages in the "
+                            "current directory that are not found in the "
                             "repository database")
     group.add_argument('--list-packages', '-l', action='store_true',
                        help="list packages in the repository")
     group.add_argument('--list-uninstalled', '-u', action='store_true',
-                       help="list packages in the repository that are not "\
+                       help="list packages in the repository that are not "
                             "installed on the local system")
     group.add_argument('--check-updates', action='store_true',
                        help="check packages in the repository for updates")
@@ -140,5 +140,8 @@ if __name__ == '__main__':
                 print(pkg)
     elif args.check_updates:
         for pkg, version in check_updates(args.repo):
-            # emulate the cower -b format to allow for parsing by other scripts
-            print(":: {pkg} -> {version}".format(pkg=pkg, version=version))
+            if args.pkgonly:
+                print(pkg.name)
+            else:
+                # emulate the cower -b format
+                print(":: {pkg} -> {version}".format(pkg=pkg, version=version))
