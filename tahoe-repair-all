@@ -6,11 +6,7 @@
 ################################################################################
 
 for item in $(tahoe list-aliases | cut -f 1 -d :); do
-	echo '*** '"$item"
-	if [ "$item" == "tahoe" ] || [ "$item" == "backup" ]; then
-	    tahoe deep-check --repair --add-lease $item: | perl -pe 's/^/\t/'
-	else
-        tahoe deep-check --repair $item: | perl -pe 's/^/\t/'
-    fi
-	echo
+    echo '*** '"$item"
+    tahoe deep-check --repair --add-lease $item: | perl -pe 's/^/\t/'
+    echo
 done
