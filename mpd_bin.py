@@ -37,7 +37,9 @@ if __name__ == '__main__':
     group.add_argument('--num-songs', type=int, default=100,
                        help="Number of songs to add to the current playlist")
     group.add_argument('--delete-bin', action='store_true', default=False,
-                       help="Delete the rotation bin")
+                       help="Delete the bin")
+    group.add_argument('--list-bin', '--ls', action='store_true',
+                       default=False, help="List of the contents of the bin")
     parser.add_argument('playbin', help="Rotation bin")
     args = parser.parse_args()
 
@@ -70,5 +72,8 @@ if __name__ == '__main__':
     elif args.delete_bin:
         for song in sticker_songs(m, 'bin', args.playbin):
             m.sticker_delete('song', song, 'bin')
+    elif args.list_bin:
+        for song in sticker_songs(m, 'bin', args.playbin):
+            print(song)
     else:
         add_from_playbin(m, args.playbin, args.num_songs)
