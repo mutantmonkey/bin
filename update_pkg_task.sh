@@ -4,8 +4,8 @@ IFS=$'\n' pkgs=($(sed -r 's/^:: (\S+) .*$/\1/'))
 for pkg in $pkgs; do
     description="Update package: $pkg"
 
-    task "$description" >/dev/null
+    task "status=pending description=\"$description\"" minimal >/dev/null 2>&1
     if [ $? -eq 1 ]; then
-        task add "$description" +arch
+        task add +arch -- "$description"
     fi
 done
