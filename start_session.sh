@@ -20,36 +20,36 @@ function spawn_tmux {
     fi
     tmux set-window-option -t1 remain-on-exit on
 
-    # tmux window 2: alot
-    tmux neww -d -t2 -nalot 'exec alot'
+    # tmux window 2: mail
+    tmux neww -d -t2 -nmail 'TERM=screen-256color exec alot'
     tmux set-window-option -t2 remain-on-exit on
 
     # tmux window 3: task
     tmux neww -d -t3 -ntask
     tmux set-window-option -t3 remain-on-exit on
 
-    # tmux window 4: ncmpcpp
+    # tmux window 4: music
     if [[ "$start_ncmpcpp" != 0 ]]; then
-        tmux neww -d -t4 -nncmpcpp 'exec ncmpcpp'
+        tmux neww -d -t4 -nmusic 'exec ncmpcpp'
     else
-        tmux neww -d -t4 -nncmpcpp
+        tmux neww -d -t4 -nmusic
     fi
     tmux set-window-option -t4 remain-on-exit on
 
-    # tmux session: alot
-    tmux -u new -d -salot -t0
-    tmux select-window -t alot:2
+    # tmux session: mail
+    tmux -u new -d -smail -t0
+    tmux select-window -t mail:2
 
-    # tmux session: ncmpcpp
-    tmux -u new -d -sncmpcpp -t0
-    tmux select-window -t ncmpcpp:4
+    # tmux session: music
+    tmux -u new -d -smusic -t0
+    tmux select-window -t music:4
 }
 
 function restore_i3_layout {
     i3-msg "workspace 1; append_layout $HOME/.config/i3/workspace-1.json"
-    roxterm --role roxterm-tmux -e 'tmux a -t0'
-    roxterm --role roxterm-alot -e 'tmux a -talot'
-    roxterm --role roxterm-ncmpcpp -e 'tmux a -tncmpcpp'
+    nohup termite --role termite-tmux -e 'tmux a -t0' 2>/dev/null >/dev/null &
+    nohup termite --role termite-mail -e 'tmux a -tmail' 2>/dev/null >/dev/null &
+    nohup termite --role termite-music -e 'tmux a -tmusic' 2>/dev/null >/dev/null &
 }
 
 spawn_tmux $@
