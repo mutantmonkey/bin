@@ -2,5 +2,5 @@
 [ -z "$1" ] && echo "Please specify the VM as the first argument."
 
 exec xpra start ssh/$1/10 --encoding=rgb --title="@title@ on $1" \
-    --dpi=96 --tray=no --notifications=no --username=user \
+    --tray=no --notifications=no --username=user \
     --start-child=torbrowser
