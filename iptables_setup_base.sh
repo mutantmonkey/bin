@@ -1,11 +1,8 @@
 #!/bin/sh
 ################################################################################
 # iptables_setup_base.sh - iptables base setup
-#
-# author: mutantmonkey <mutantmonkey@mutantmonkey.in>
 ################################################################################
 
-IFACE="eth0"
 IPT=$(which iptables)
 IP6T=$(which ip6tables)
 
