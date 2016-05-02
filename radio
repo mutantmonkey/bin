@@ -53,32 +53,31 @@ case "$1" in
         ;;
     somafm-defcon)
         # http://somafm.com/defcon/directstreamlinks.html
-        stream_url=http://uwstream3.somafm.com:6200
+        stream_url=http://ice1.somafm.com/defcon-128-mp3
         ;;
     somafm-dronezone)
         # http://somafm.com/dronezone/directstreamlinks.html
-        stream_url=http://uwstream2.somafm.com:8100
+        stream_url=http://ice1.somafm.com/dronezone-128-aac
         ;;
     somafm-fluid)
         # http://somafm.com/fluid/directstreamlinks.html
-        stream_url=http://uwstream2.somafm.com:9196
+        stream_url=http://ice1.somafm.com/fluid-128-aac
         ;;
     somafm-groovesalad)
         # http://somafm.com/groovesalad/directstreamlinks.html
-        stream_url=http://uwstream2.somafm.com:3000
+        stream_url=http://ice1.somafm.com/groovesalad-128-aac
         ;;
     somafm-secretagent)
         # http://somafm.com/secretagent/directstreamlinks.html
-        stream_url=http://xstream1.somafm.com:9010
+        stream_url=http://ice1.somafm.com/secretagent-128-aac
         ;;
     somafm-spacestation)
         # http://somafm.com/spacestation/directstreamlinks.html
-        stream_url=http://xstream1.somafm.com:8200
+        stream_url=http://ice1.somafm.com/spacestation-128-aac
         ;;
     somafm-thetrip)
         # http://somafm.com/thetrip/directstreamlinks.html
-        stream_url=http://xstream1.somafm.com:2504
-        #stream_url=http://uwstream3.somafm.com:2504
+        stream_url=http://ice1.somafm.com/thetrip-128-mp3
         ;;
     startfm)
         stream_url=http://eteris.startfm.lt/startfm
