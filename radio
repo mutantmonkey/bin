@@ -1,11 +1,6 @@
 #!/bin/zsh
 
 case "$1" in
-    echofm)
-        # echoFM 88,4 Feiburg, Germany
-        # http://www.echo-fm.uni-freiburg.de/
-        stream_url=http://xgrid04.ruf.uni-freiburg.de:8000/
-        ;;
     kalx)
         # KALX-FM 90.7 Berkeley, CA
         # http://kalx.berkeley.edu/how-listen
@@ -81,6 +76,11 @@ case "$1" in
         ;;
     startfm)
         stream_url=http://eteris.startfm.lt/startfm
+        ;;
+    unifm)
+        # uniFM 88,4 Freiburg, Germany
+        # https://www.unicross.uni-freiburg.de/
+        stream_url=http://132.230.1.154:8181/mount.mp3
         ;;
     wcbn)
         # WCBN-FM 88.3 Ann Arbor, MI
