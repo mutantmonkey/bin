@@ -143,5 +143,5 @@ if [ -n "$MPD_HOST" ]; then
     mpc add $stream_url
     mpc play
 else
-    torsocks -i mpv --loop=force $stream_url
+    torsocks -i mpv --no-cache-pause --loop=force $stream_url
 fi
