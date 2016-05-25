@@ -19,11 +19,9 @@ case "$1" in
         pactl set-sink-input-mute "$input_index" toggle
         ;;
     up)
-        canberra-gtk-play -i audio-volume-change
         pactl set-sink-input-volume "$input_index" +2%
         ;;
     down)
-        canberra-gtk-play -i audio-volume-change
         pactl set-sink-input-volume "$input_index" -2%
         ;;
 esac
