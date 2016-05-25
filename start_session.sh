@@ -1,17 +1,20 @@
 #!/bin/zsh
 
+# defaults
+start_irc=0
+start_ncmpcpp=0
+start_messaging=1
+
+# read arguments and set variables as appropriate
+for arg in $@; do
+    case "$arg" in
+        "--irc")            start_irc=1;;
+        "--ncmpcpp")        start_ncmpcpp=1;;
+        "--no-messaging")   start_messaging=0;;
+    esac
+done
+
 function spawn_tmux {
-    start_irc=0
-    start_ncmpcpp=0
-
-    # read arguments and set variables as appropriate
-    for arg in $@; do
-        case "$arg" in
-            "--irc")        start_irc=1;;
-            "--ncmpcpp")    start_ncmpcpp=1;;
-        esac
-    done
-
     # tmux window 1: irc (first window of session)
     if [[ "$start_irc" != 0 ]]; then
         tmux -u new -d -s0 -nirc "exec $IRC_COMMAND"
@@ -52,5 +55,13 @@ function restore_i3_layout {
     nohup termite --role termite-music -e 'tmux a -tmusic' 2>/dev/null >/dev/null &
 }
 
-spawn_tmux $@
+function connect_messaging {
+    if [[ "$start_messaging" != 0 ]]; then
+        sleep 5
+        connect_xmpp.sh
+    fi
+}
+
+spawn_tmux
 restore_i3_layout
+connect_messaging &
