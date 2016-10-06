@@ -2,17 +2,17 @@
 
 case "$1" in
     kalx)
-        # KALX-FM 90.7 Berkeley, CA
+        # KALX 90.7 FM Berkeley, CA
         # http://kalx.berkeley.edu/how-listen
         stream_url=http://icecast.media.berkeley.edu:8000/kalx-128.ogg
         ;;
     kaos)
-        # KAOS-FM 89.3 Olympia, WA
+        # KAOS 89.3 FM Olympia, WA
         # http://kaosradio.org/listen/
         stream_url=http://205.134.192.90:8930/
         ;;
     kcpr)
-        # KCPR-FM 91.3 San Luis Obispo, CA
+        # KCPR 91.3 FM San Luis Obispo, CA
         # http://kcpr.org/listen/
         #stream_url=http://129.65.35.106:8000/KCPRHIGH
         stream_url=http://129.65.35.106:8000/KCPRMP3
@@ -26,16 +26,20 @@ case "$1" in
         # KPBS-FM 89.5 San Diego, CA
         stream_url=http://kpbs.streamguys.tv:80/kpbs-aac
         ;;
+    kqac)
+        # KQAC 89.9 FM Portland, OR
+        stream_url=http://allclassical-ice.streamguys.com/ac128kmp3
+        ;;
     ksdt)
         stream_url=http://ksdt.ucsd.edu:8000/stream
         ;;
     kvcu)
-        # KVCU-AM 1190 Boulder, CO
+        # KVCU AM 1190 Boulder, CO
         # http://www.radio1190.org/
         stream_url=http://radio1190.colorado.edu:8000/master.mp3
         ;;
     kvrx)
-        # KVRX-FM 91.7 Austin, TX
+        # KVRX 91.7 FM Austin, TX
         # http://www.kvrx.org/livestream/
         stream_url=http://tstv-stream.tsm.utexas.edu:8000/kvrx_livestream
         ;;
@@ -93,17 +97,17 @@ case "$1" in
         stream_url=http://wknc.sma.ncsu.edu:8000/wknchq.ogg
         ;;
     wmfo)
-        # WMFO-FM 91.5 Medford, MA
+        # WMFO 91.5 FM Medford, MA
         # http://www.wmfo.org/
         stream_url=http://130.64.87.48:8000/
         ;;
     wmse)
-        # WMSE-FM 91.7 Milwaukee, WI
+        # WMSE 91.7 FM Milwaukee, WI
         # http://www.wmse.org/stream/
         stream_url=http://peace.str3am.com:6780
         ;;
     wrek)
-        # WREK-FM 91.1 Atlanta, GA
+        # WREK 91.1 FM Atlanta, GA
         # https://www.wrek.org
         stream_url=http://streaming.wrek.org:8000/main/128kb.mp3
         ;;
@@ -113,15 +117,15 @@ case "$1" in
         stream_url=http://engine.wuvt.vt.edu:8000/wuvt-hq.ogg
         ;;
     wvtf)
-        # WVTF-FM 89.1 Roanoke, VA
+        # WVTF 89.1 FM Roanoke, VA
         stream_url=http://mp3.rev.net:8000/wvtf-64.mp3
         ;;
     wwvt)
-        # WWVT-FM 89.9 Roanoke, VA (Radio IQ)
+        # Radio IQ
         stream_url=http://mp3.rev.net:8000/riq-64.mp3
         ;;
     wxyc)
-        # WXYC-FM 89.3 Chapel Hill, NC
+        # WXYC 89.3 FM Chapel Hill, NC
         # http://www.wxyc.org/listen
         stream_url=http://audio-mp3.ibiblio.org:8000/wxyc-alt.mp3
         #stream_url=http://audio-mp3.ibiblio.org:8000/wxyc.mp3
