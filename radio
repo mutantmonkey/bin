@@ -22,6 +22,10 @@ case "$1" in
         # http://kdvs.org/programming/listen-now/
         stream_url=http://169.237.101.239:8000/kdvs128vorbis
         ;;
+    kexp)
+        # KEXP 90.3 FM Seattle, WA
+        stream_url=http://live-mp3-128.kexp.org:8000/
+        ;;
     kpbs)
         # KPBS-FM 89.5 San Diego, CA
         stream_url=http://kpbs.streamguys.tv:80/kpbs-aac
@@ -43,8 +47,8 @@ case "$1" in
         # http://www.kvrx.org/livestream/
         stream_url=http://tstv-stream.tsm.utexas.edu:8000/kvrx_livestream
         ;;
-    morefm)
-        stream_url=http://204.45.27.179:3006/
+    punk-irratia)
+        stream_url=http://kinoki.es:8000/punkirratia
         ;;
     radioq)
         # http://www.radioq.de/hoeren/
@@ -114,7 +118,7 @@ case "$1" in
     wuvt)
         # WUVT-FM 90.7 Blacksburg, VA
         # https://www.wuvt.vt.edu/listen-live
-        stream_url=http://engine.wuvt.vt.edu:8000/wuvt-hq.ogg
+        stream_url=https://stream.wuvt.vt.edu/wuvt-hq.ogg
         ;;
     wvtf)
         # WVTF 89.1 FM Roanoke, VA
