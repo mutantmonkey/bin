@@ -1,4 +1,4 @@
 #!/bin/sh
 for remote in $(git remote); do
-    [ "$remote" != "all" ] && git push $remote $@
+    [ "$remote" != "all" ] && [ "${remote:0:1}" != "_" ] && git push $remote $@
 done
