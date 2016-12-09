@@ -1,0 +1,13 @@
+#!/bin/sh
+newenv=""
+
+if [ -n "$GDK_SCALE" ]; then
+    newenv+="GDK_SCALE=$GDK_SCALE\n"
+fi
+
+if [ -n "$GDK_DPI_SCALE" ]; then
+    newenv+="GDK_DPI_SCALE=$GDK_DPI_SCALE\n"
+fi
+
+echo -e "$newenv" | ssh $1 tee ~/.xprofile
+ssh $1 chmod +x ~/.xprofile
