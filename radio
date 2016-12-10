@@ -14,8 +14,8 @@ case "$1" in
     kcpr)
         # KCPR 91.3 FM San Luis Obispo, CA
         # http://kcpr.org/listen/
-        #stream_url=http://129.65.35.106:8000/KCPRHIGH
-        stream_url=http://129.65.35.106:8000/KCPRMP3
+        stream_url=http://129.65.35.106:8000/KCPRHIGH
+        #stream_url=http://129.65.35.106:8000/KCPRMP3
         ;;
     kdvs)
         # KDVS-FM 90.3 Davis, CA
