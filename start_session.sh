@@ -24,7 +24,8 @@ function spawn_tmux {
     tmux set-window-option -t1 remain-on-exit on
 
     # tmux window 2: mail
-    tmux neww -d -t2 -nmail 'TERM=screen-256color exec alot'
+    #tmux neww -d -t2 -nmail 'TERM=screen-256color exec alot'
+    tmux neww -d -t2 -nmail
     tmux set-window-option -t2 remain-on-exit on
 
     # tmux window 3: task
