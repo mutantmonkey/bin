@@ -16,7 +16,8 @@ if [ $attach -eq 1 ]; then
         --username=user \
         --desktop-scaling=no
 else
-    app="${2:-firefox}"
+    shift 1
+    app="${@:-firefox}"
 
     [ -f ~/.config/gtk-2.0/gtkrc ] \
         && scp ~/.config/gtk-2.0/gtkrc ${xpra_host}:.config/gtk-2.0/gtkrc
