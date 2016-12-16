@@ -18,7 +18,7 @@ if [ $attach -eq 1 ]; then
 else
     app="${2:-firefox}"
 
-    [ -f ~/.config/gtk-2.0/gtrkc ] \
+    [ -f ~/.config/gtk-2.0/gtkrc ] \
         && scp ~/.config/gtk-2.0/gtkrc ${xpra_host}:.config/gtk-2.0/gtkrc
     [ -f ~/.config/gtk-3.0/settings.ini ] \
         && scp ~/.config/gtk-3.0/settings.ini ${xpra_host}:.config/gtk-3.0/settings.ini
