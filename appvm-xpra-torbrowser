@@ -1,0 +1,30 @@
+#!/bin/sh
+
+attach=0
+xpra_host="$1"
+conn_str="ssh/${xpra_host}/10"
+scale_factor=${GDK_SCALE:-1}
+
+# try to determine if we need to attach or not
+xpra info "$conn_str" 2>&1 >/dev/null && attach=1
+
+if [ $attach -eq 1 ]; then
+    xpra attach "${conn_str}" \
+        --encoding=rgb \
+        --title="@title@ on ${xpra_host}" \
+        --tray=no \
+        --notifications=no \
+        --username=user \
+        --desktop-scaling=${scale_factor}
+else
+    app="env TOR_CONTROL_PORT=9151 sandboxed-tor-browser"
+
+    xpra start "${conn_str}" \
+        --encoding=rgb \
+        --title="@title@ on ${xpra_host}" \
+        --tray=no \
+        --notifications=no \
+        --username=user \
+        --start-child="${app}" \
+        --desktop-scaling=${scale_factor}
+fi
