@@ -1,15 +1,38 @@
 #!/bin/sh
 
+attach=0
 xpra_host="$1"
-app="${2:-firefox}"
+conn_str="ssh/${xpra_host}/10"
 
-[ -f ~/.config/gtk-2.0/gtrkc ] \
-    && scp ~/.config/gtk-2.0/gtkrc ${xpra_host}:.config/gtk-2.0/gtkrc
-[ -f ~/.config/gtk-3.0/settings.ini ] \
-    && scp ~/.config/gtk-3.0/settings.ini ${xpra_host}:.config/gtk-3.0/settings.ini
+# try to determine if we need to attach or not
+xpra info "$conn_str" 2>&1 >/dev/null && attach=1
 
-if [ -n "$GDK_SCALE" ]; then
-    xpra start ssh/${xpra_host}/10 --encoding=rgb --title="@title@ on ${xpra_host}" --tray=no --notifications=no --username=user --start-child="env GDK_SCALE=${GDK_SCALE} GDK_DPI_SCALE=${GDK_DPI_SCALE:-1} ${app}" --desktop-scaling=no
+if [ $attach -eq 1 ]; then
+    xpra attach "${conn_str}" \
+        --encoding=rgb \
+        --title="@title@ on ${xpra_host}" \
+        --tray=no \
+        --notifications=no \
+        --username=user \
+        --desktop-scaling=no
 else
-    xpra start ssh/$1/10 --encoding=rgb --title="@title@ on ${xpra_host}" --tray=no --notifications=no --username=user --start-child="${app}" --desktop-scaling=no
+    app="${2:-firefox}"
+
+    [ -f ~/.config/gtk-2.0/gtrkc ] \
+        && scp ~/.config/gtk-2.0/gtkrc ${xpra_host}:.config/gtk-2.0/gtkrc
+    [ -f ~/.config/gtk-3.0/settings.ini ] \
+        && scp ~/.config/gtk-3.0/settings.ini ${xpra_host}:.config/gtk-3.0/settings.ini
+
+    if [ -n "$GDK_SCALE" ]; then
+        app="env GDK_SCALE=${GDK_SCALE} GDK_DPI_SCALE=${GDK_DPI_SCALE:-1} ${app}"
+    fi
+
+    xpra start "${conn_str}" \
+        --encoding=rgb \
+        --title="@title@ on ${xpra_host}" \
+        --tray=no \
+        --notifications=no \
+        --username=user \
+        --start-child="${app}" \
+        --desktop-scaling=no
 fi
