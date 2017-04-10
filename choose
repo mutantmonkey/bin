@@ -1,0 +1,11 @@
+#!/usr/bin/python3
+
+import argparse
+import random
+
+parser = argparse.ArgumentParser(description="Make a random choice")
+parser.add_argument('choices', nargs='+')
+args = parser.parse_args()
+
+r = random.SystemRandom()
+print(r.choice(args.choices))
