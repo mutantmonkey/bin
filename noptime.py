@@ -23,7 +23,7 @@ h.create_schedule({
             'on': False,
         },
     },
-    'time': "PT00:00:15",
+    'time': "PT00:00:25",
     'autodelete': True,
 })
 
