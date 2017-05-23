@@ -1,0 +1,4 @@
+#!/bin/sh
+mbsync -c "$XDG_CONFIG_HOME/isync/mbsyncrc" main || exit 1
+notmuch new
+notify-send "email synced"
