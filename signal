@@ -1,0 +1,15 @@
+#!/bin/bash
+if [[ -n "$GDK_SCALE" ]]; then
+    chromium \
+        --proxy-server=socks5://127.0.0.1:9049 \
+        --host-resolver-rules="MAP * 0.0.0.0 , EXCLUDE myproxy" \
+        --profile-directory=Default \
+        --app-id=bikioccmkafdpakkkcpdbppfkghcmihk \
+        --force-device-scale-factor="$GDK_SCALE"
+else
+    chromium \
+        --proxy-server=socks5://127.0.0.1:9049 \
+        --host-resolver-rules="MAP * 0.0.0.0 , EXCLUDE myproxy" \
+        --profile-directory=Default \
+        --app-id=bikioccmkafdpakkkcpdbppfkghcmihk
+fi

@@ -7,7 +7,7 @@ conn_str="ssh/${xpra_host}/10"
 # try to determine if we need to attach or not
 xpra info "$conn_str" 2>&1 >/dev/null && attach=1
 
-if [ $attach -eq 1 ]; then
+if [[ $attach -eq 1 ]]; then
     xpra attach "${conn_str}" \
         --encoding=rgb \
         --title="@title@ on ${xpra_host}" \
@@ -19,12 +19,12 @@ else
     shift 1
     app="${@:-firefox}"
 
-    [ -f ~/.config/gtk-2.0/gtkrc ] \
+    [[ -f ~/.config/gtk-2.0/gtkrc ]] \
         && scp ~/.config/gtk-2.0/gtkrc ${xpra_host}:.config/gtk-2.0/gtkrc
-    [ -f ~/.config/gtk-3.0/settings.ini ] \
+    [[ -f ~/.config/gtk-3.0/settings.ini ]] \
         && scp ~/.config/gtk-3.0/settings.ini ${xpra_host}:.config/gtk-3.0/settings.ini
 
-    if [ -n "$GDK_SCALE" ]; then
+    if [[ -n "$GDK_SCALE" ]]; then
         app="env GDK_SCALE=${GDK_SCALE} GDK_DPI_SCALE=${GDK_DPI_SCALE:-1} ${app}"
     fi
 
