@@ -59,8 +59,8 @@ function restore_i3_layout {
 function connect_messaging {
     if [[ "$start_messaging" != 0 ]]; then
         sleep 5
-        connect_xmpp.sh
-        gtk-launch chrome-bikioccmkafdpakkkcpdbppfkghcmihk-Default
+        #connect_xmpp.sh
+        gtk-launch signal
     fi
 }
 
