@@ -140,6 +140,15 @@ case "$1" in
         # http://yurt.hampshire.edu/
         stream_url=http://192.101.188.47:8000
         ;;
+    xbn-320)
+        stream_url=https://stream.xbn.fm/xbn-320
+        ;;
+    xbn-fc-archive)
+        stream_url=https://stream.xbn.fm/xbn-fc-archive
+        ;;
+    xbn-flac)
+        stream_url=https://stream.xbn.fm/xbn-flac
+        ;;
     *)
         echo "Please enter a supported station."
         return 1
