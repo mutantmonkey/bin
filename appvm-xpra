@@ -2,10 +2,12 @@
 
 attach=0
 xpra_host="$1"
-conn_str="ssh/${xpra_host}/10"
+xpra_display=10
+conn_str="ssh/${xpra_host}/${xpra_display}"
 
 # try to determine if we need to attach or not
-xpra info "$conn_str" 2>&1 >/dev/null && attach=1
+#xpra info "$conn_str" 2>&1 >/dev/null && attach=1
+ssh "${xpra_host}" :${xpra_display} 2>&1 >/dev/null && attach=1
 
 if [[ $attach -eq 1 ]]; then
     xpra attach "${conn_str}" \
@@ -35,5 +37,6 @@ else
         --notifications=no \
         --username=user \
         --start-child="${app}" \
+        --start-via-proxy=no \
         --desktop-scaling=no
 fi
