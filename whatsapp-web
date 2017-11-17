@@ -4,12 +4,12 @@ if [[ -n "$GDK_SCALE" ]]; then
         --proxy-server=socks5://127.0.0.1:9049 \
         --host-resolver-rules="MAP * 0.0.0.0 , EXCLUDE myproxy" \
         --profile-directory=Default \
-        --app-id=bikioccmkafdpakkkcpdbppfkghcmihk \
-        --force-device-scale-factor="$GDK_SCALE"
+        --force-device-scale-factor="$GDK_SCALE" \
+        --app=https://web.whatsapp.com
 else
     chromium \
         --proxy-server=socks5://127.0.0.1:9049 \
         --host-resolver-rules="MAP * 0.0.0.0 , EXCLUDE myproxy" \
         --profile-directory=Default \
-        --app-id=bikioccmkafdpakkkcpdbppfkghcmihk
+        -app=https://web.whatsapp.com
 fi

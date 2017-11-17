@@ -1,0 +1,9 @@
+#!/bin/bash
+if [[ -n "$GDK_SCALE" ]]; then
+    proxychains -f /etc/proxychains/tor.conf electron \
+        --force-device-scale-factor="$GDK_SCALE" \
+        /usr/lib/signal/resources/app.asar
+else
+    proxychains -f /etc/proxychains/tor.conf electron \
+        /usr/lib/signal/resources/app.asar
+fi
