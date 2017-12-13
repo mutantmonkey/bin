@@ -1,9 +1,18 @@
 #!/bin/bash
+export HTTPS_PROXY=socks5://signal:0@localhost:9050
+
 if [[ -n "$GDK_SCALE" ]]; then
-    proxychains -f /etc/proxychains/tor.conf electron \
+     electron \
         --force-device-scale-factor="$GDK_SCALE" \
         /usr/lib/signal/resources/app.asar
+#    proxychains -f /etc/proxychains/tor.conf electron \
+#        --force-device-scale-factor="$GDK_SCALE" \
+#        /usr/lib/signal/resources/app.asar
 else
-    proxychains -f /etc/proxychains/tor.conf electron \
+    electron \
         /usr/lib/signal/resources/app.asar
+#    proxychains -f /etc/proxychains/tor.conf electron \
+#        /usr/lib/signal/resources/app.asar
 fi
+
+unset HTTPS_PROXY
