@@ -1,5 +1,5 @@
 #!/bin/bash
-export HTTPS_PROXY=socks5://signal:0@localhost:9050
+export HTTPS_PROXY=socks5h://signal:0@localhost:9050
 
 if [[ -n "$GDK_SCALE" ]]; then
      electron \
