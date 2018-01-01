@@ -5,19 +5,17 @@ xpra_host="$1"
 xpra_display=10
 conn_str="ssh/${xpra_host}/${xpra_display}"
 
-# try to determine if we need to attach or not
-#xpra info "$conn_str" 2>&1 >/dev/null && attach=1
-ssh "${xpra_host}" :${xpra_display} 2>&1 >/dev/null && attach=1
+systemctl --user start appvm-ssh@${xpra_host}.service
 
-if [[ $attach -eq 1 ]]; then
-    xpra attach "${conn_str}" \
-        --encoding=rgb \
-        --title="@title@ on ${xpra_host}" \
-        --tray=no \
-        --notifications=no \
-        --username=user \
-        --desktop-scaling=no
-else
+xpra attach "${conn_str}" \
+    --encoding=rgb \
+    --title="@title@ on ${xpra_host}" \
+    --tray=no \
+    --notifications=no \
+    --username=user \
+    --desktop-scaling=no
+
+if [[ $? != 0 ]]; then
     shift 1
     app="${@:-firefox}"
 
