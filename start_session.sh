@@ -58,12 +58,11 @@ function restore_i3_layout {
 
 function connect_messaging {
     if [[ "$start_messaging" != 0 ]]; then
-        sleep 5
-        #connect_xmpp.sh
-        gtk-launch signal
+        #nohup sh -c "sleep 5 && connect_xmpp.sh" >/dev/null 2>/dev/null &
+        nohup sh -c "sleep 5 && gtk-launch signal" >/dev/null 2>/dev/null &
     fi
 }
 
 spawn_tmux
 restore_i3_layout
-connect_messaging &
+connect_messaging
