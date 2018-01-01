@@ -60,6 +60,7 @@ function connect_messaging {
     if [[ "$start_messaging" != 0 ]]; then
         #nohup sh -c "sleep 5 && connect_xmpp.sh" >/dev/null 2>/dev/null &
         nohup sh -c "sleep 5 && gtk-launch signal" >/dev/null 2>/dev/null &
+        nohup sh -c "sleep 5 && gtk-launch whatsapp" >/dev/null 2>/dev/null &
     fi
 }
 
