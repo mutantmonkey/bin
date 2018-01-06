@@ -17,6 +17,10 @@ case "$1" in
         stream_url=http://129.65.35.106:8000/KCPRHIGH
         #stream_url=http://129.65.35.106:8000/KCPRMP3
         ;;
+    kcsb)
+        # KCSB-FM 91.9 Santa Barabara, CA
+        stream_url=http://live.kcsb.org/KCSB_128
+        ;;
     kdvs)
         # KDVS-FM 90.3 Davis, CA
         # http://kdvs.org/programming/listen-now/
