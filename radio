@@ -164,5 +164,6 @@ if [ -n "$MPD_HOST" ]; then
     mpc add $stream_url
     mpc play
 else
-    torsocks -i mpv --no-cache-pause --loop=force $stream_url
+    #PULSE_PROP='media.role=music' torsocks -i mpv --no-cache-pause --loop-playlist=force $stream_url
+    http_proxy=http://127.0.0.1:8118 PULSE_PROP='media.role=music' mpv --no-cache-pause --loop-playlist=force --tls-verify $stream_url
 fi
