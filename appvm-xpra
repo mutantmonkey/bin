@@ -7,8 +7,15 @@ conn_str="ssh/${xpra_host}/${xpra_display}"
 
 systemctl --user start appvm-ssh@${xpra_host}.service
 
-xpra info "${conn_str}" 2>&1 | grep error
-if [[ $? == 0 ]]; then
+xpra attach "${conn_str}" \
+    --encoding=rgb \
+    --title="@title@ on ${xpra_host}" \
+    --tray=no \
+    --notifications=no \
+    --username=user \
+    --desktop-scaling=no
+
+if [[ $? != 0 ]]; then
     shift 1
     app="${@:-firefox}"
 
@@ -29,13 +36,5 @@ if [[ $? == 0 ]]; then
         --username=user \
         --start-child="${app}" \
         --start-via-proxy=no \
-        --desktop-scaling=no
-else
-    xpra attach "${conn_str}" \
-        --encoding=rgb \
-        --title="@title@ on ${xpra_host}" \
-        --tray=no \
-        --notifications=no \
-        --username=user \
         --desktop-scaling=no
 fi

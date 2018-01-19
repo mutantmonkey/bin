@@ -7,8 +7,15 @@ scale_factor=${GDK_SCALE:-1}
 
 systemctl --user start appvm-ssh@${xpra_host}.service
 
-xpra info "${conn_str}" 2>&1 | grep error
-if [[ $? == 0 ]]; then
+xpra attach "${conn_str}" \
+    --encoding=rgb \
+    --title="@title@ on ${xpra_host}" \
+    --tray=no \
+    --notifications=no \
+    --username=user \
+    --desktop-scaling=${scale_factor}
+
+if [[ $? != 0 ]]; then
     app="env TOR_CONTROL_PORT=9151 sandboxed-tor-browser"
     xpra start "${conn_str}" \
         --encoding=rgb \
@@ -17,13 +24,5 @@ if [[ $? == 0 ]]; then
         --notifications=no \
         --username=user \
         --start-child="${app}" \
-        --desktop-scaling=${scale_factor}
-else
-    xpra attach "${conn_str}" \
-        --encoding=rgb \
-        --title="@title@ on ${xpra_host}" \
-        --tray=no \
-        --notifications=no \
-        --username=user \
         --desktop-scaling=${scale_factor}
 fi
