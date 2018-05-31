@@ -26,6 +26,8 @@ if [[ $? != 0 ]]; then
 
     if [[ -n "$GDK_SCALE" ]]; then
         app="env GDK_SCALE=${GDK_SCALE} GDK_DPI_SCALE=${GDK_DPI_SCALE:-1} ${app}"
+    elif [[ -n "$GDK_DPI_SCALE" ]]; then
+        app="env GDK_DPI_SCALE=${GDK_DPI_SCALE:-1} ${app}"
     fi
 
     xpra start "${conn_str}" \
