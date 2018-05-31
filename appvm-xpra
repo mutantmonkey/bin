@@ -1,42 +1,130 @@
-#!/bin/sh
+#!/usr/bin/python3
 
-attach=0
-xpra_host="$1"
-xpra_display=10
-conn_str="ssh/${xpra_host}/${xpra_display}"
+import argparse
+import libvirt
+import os
+import subprocess
+import yaml
 
-systemctl --user start appvm-ssh@${xpra_host}.service
 
-xpra attach "${conn_str}" \
-    --encoding=rgb \
-    --title="@title@ on ${xpra_host}" \
-    --tray=no \
-    --notifications=no \
-    --username=user \
-    --desktop-scaling=no
+def domain_to_addr(name, uri='qemu:///system'):
+    v = libvirt.open('qemu:///system')
+    domain = v.lookupByName(name)
+    if domain.isActive() != 1:
+        raise Exception("VM is not running")
 
-if [[ $? != 0 ]]; then
-    shift 1
-    app="${@:-firefox}"
+    ifaces = domain.interfaceAddresses(2)
+    for iface in ifaces.values():
+        return iface['addrs'][0]['addr']
 
-    [[ -f ~/.config/gtk-2.0/gtkrc ]] \
-        && scp ~/.config/gtk-2.0/gtkrc ${xpra_host}:.config/gtk-2.0/gtkrc
-    [[ -f ~/.config/gtk-3.0/settings.ini ]] \
-        && scp ~/.config/gtk-3.0/settings.ini ${xpra_host}:.config/gtk-3.0/settings.ini
+    raise Exception("No interfaces found on VM")
 
-    if [[ -n "$GDK_SCALE" ]]; then
-        app="env GDK_SCALE=${GDK_SCALE} GDK_DPI_SCALE=${GDK_DPI_SCALE:-1} ${app}"
-    elif [[ -n "$GDK_DPI_SCALE" ]]; then
-        app="env GDK_DPI_SCALE=${GDK_DPI_SCALE:-1} ${app}"
-    fi
 
-    xpra start "${conn_str}" \
-        --encoding=rgb \
-        --title="@title@ on ${xpra_host}" \
-        --tray=no \
-        --notifications=no \
-        --username=user \
-        --start-child="${app}" \
-        --start-via-proxy=no \
-        --desktop-scaling=no
-fi
+def scp_if_exists(path, user, host, ssh_identity=None):
+    local_path = os.path.expanduser(os.path.join('~', path))
+    if os.path.exists(path):
+        dest = '{0}@{1}:{2}'.format(user, host, path)
+        if ssh_identity is not None:
+            subprocess.call(['scp', '-i', ssh_identity, local_path, dest])
+        else:
+            subprocess.call(['scp', local_path, dest])
+
+
+if __name__ == '__main__':
+    default_user = "user"
+    default_identity = None
+
+    try:
+        import xdg.BaseDirectory
+        configpath = xdg.BaseDirectory.load_first_config(
+            'appvm/config.yml')
+    except ModuleNotFoundError:
+        configpath = os.path.expanduser('~/.config/appvm/config.yml')
+
+    if os.path.exists(configpath):
+        config = yaml.safe_load(open(configpath))
+        default_user = config.get('user', default_user)
+        default_identity = config.get('identity', default_identity)
+
+    parser = argparse.ArgumentParser(
+        description="Connect to AppVMs using Xpra over SSH")
+    parser.add_argument('--user', '-u', default=default_user,
+                        help="SSH username")
+    parser.add_argument('--identity', '-i', default=default_identity,
+                        help="SSH identity file")
+    parser.add_argument('--shell', action='store_true',
+                        help="Connect using SSH instead of Xpra")
+    parser.add_argument('domain_name', help="Libvirt domain name of VM")
+    parser.add_argument('app', nargs='?', default="firefox",
+                        help="App to launch")
+    args = parser.parse_args()
+
+    domain_name = args.domain_name
+
+    split_dname = domain_name.split('@', 1)
+    if len(split_dname) > 1:
+        user = split_dname[0]
+        domain_name = split_dname[1]
+    else:
+        user = args.user
+
+    xpra_display = 10
+    xpra_host = domain_to_addr(domain_name)
+    xpra_title = "@title@ on {0}".format(domain_name)
+
+    app = args.app
+
+    if args.shell:
+        if args.identity is not None:
+            subprocess.call([
+                'ssh', '-i', args.identity, '-l', user, xpra_host])
+        else:
+            subprocess.call([
+                'ssh', '-l', user, xpra_host])
+    else:
+        if args.identity is not None:
+            ssh_cmd = "ssh -i {0}".format(args.identity)
+        else:
+            ssh_cmd = "ssh"
+
+        p = subprocess.call([
+            'xpra', 'attach',
+            'ssh/{0}@{1}/{2}'.format(user, xpra_host, xpra_display),
+            '--ssh={0}'.format(ssh_cmd),
+            '--encoding=rgb',
+            '--title={0}'.format(xpra_title),
+            '--tray=no',
+            '--notifications=no',
+            '--username=user',
+            '--desktop-scaling=no',
+        ])
+
+        if p != 0:
+            if len(os.environ.get('GDK_SCALE', '')) > 0:
+                app = "env GDK_SCALE={0} GDK_DPI_SCALE={1} {2}".format(
+                    os.environ['GDK_SCALE'],
+                    os.environ.get('GDK_DPI_SCALE', '1'),
+                    app)
+            elif len(os.environ.get('GDK_DPI_SCALE', '')) > 0:
+                app = "env GDK_DPI_SCALE={0} {1}".format(
+                    os.environ.get('GDK_DPI_SCALE', '1'),
+                    app)
+
+            scp_if_exists('.config/gtk-2.0/gtkrc', user, xpra_host,
+                          args.identity)
+            scp_if_exists('.config/gtk-3.0/settings.ini', user, xpra_host,
+                          args.identity)
+
+            subprocess.call([
+                'xpra', 'start',
+                'ssh/{0}@{1}/{2}'.format(user, xpra_host, xpra_display),
+                '--ssh={0}'.format(ssh_cmd),
+                '--encoding=rgb',
+                '--title={0}'.format(xpra_title),
+                '--tray=no',
+                '--notifications=no',
+                '--username=user',
+                '--start-child={0}'.format(app),
+                '--start-via-proxy=no',
+                '--desktop-scaling=no',
+            ])
