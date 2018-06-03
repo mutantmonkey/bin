@@ -106,10 +106,9 @@ if __name__ == '__main__':
             'HostKeyAlias=appvm:{0}:{1}'.format(socket.gethostname(),
                                                 domain_name)
         ]
-    ssh_args.append(xpra_host)
 
     if args.shell:
-        subprocess.call(ssh_args)
+        subprocess.call(ssh_args + [xpra_host])
     else:
         ssh_cmd = ' '.join(ssh_args)
 
