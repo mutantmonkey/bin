@@ -13,9 +13,17 @@ def domain_to_addr(name, uri='qemu:///system'):
     if domain.isActive() != 1:
         raise Exception("VM is not running")
 
-    ifaces = domain.interfaceAddresses(2)
+    ifaces = domain.interfaceAddresses(0)
     for iface in ifaces.values():
         return iface['addrs'][0]['addr']
+
+    ifaces = domain.interfaceAddresses(1)
+    for iface, data in ifaces.items():
+        if iface != 'lo':
+            for addr in data['addrs']:
+                if addr['type'] == 1 and addr[0:6] == 'fe80':
+                    continue
+                return addr['addr']
 
     raise Exception("No interfaces found on VM")
 
