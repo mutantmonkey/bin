@@ -29,7 +29,7 @@ def domain_to_addr(name, uri='qemu:///system'):
     raise Exception("No interfaces found on VM")
 
 
-def scp_if_exists(path, host, user=None, ssh_identity=None):
+def scp_if_exists(path, host, user=None, scp_args=['scp']):
     local_path = os.path.expanduser(os.path.join('~', path))
     if os.path.exists(path):
         if user is not None:
@@ -37,10 +37,7 @@ def scp_if_exists(path, host, user=None, ssh_identity=None):
         else:
             dest = '{0}@{1}'.format(host, path)
 
-        if ssh_identity is not None:
-            subprocess.call(['scp', '-i', ssh_identity, local_path, dest])
-        else:
-            subprocess.call(['scp', local_path, dest])
+        subprocess.call(scp_args + [local_path, dest])
 
 
 if __name__ == '__main__':
@@ -96,16 +93,20 @@ if __name__ == '__main__':
     app = args.app
 
     ssh_args = ['ssh']
+    scp_args = ['scp']
     if identity_file is not None:
         ssh_args += ['-i', identity_file]
+        scp_args += ['-i', identity_file]
     if user is not None:
         ssh_args += ['-l', user]
     if not args.skip_libvirt:
-        ssh_args += [
+        hka_arg = [
             '-o',
             'HostKeyAlias=appvm:{0}:{1}'.format(socket.gethostname(),
                                                 domain_name)
         ]
+        ssh_args += hka_arg
+        scp_args += hka_arg
 
     if args.shell:
         subprocess.call(ssh_args + [xpra_host])
@@ -135,10 +136,9 @@ if __name__ == '__main__':
                     os.environ.get('GDK_DPI_SCALE', '1'),
                     app)
 
-            scp_if_exists('.config/gtk-2.0/gtkrc', xpra_host, user,
-                          identity_file)
+            scp_if_exists('.config/gtk-2.0/gtkrc', xpra_host, user, scp_args)
             scp_if_exists('.config/gtk-3.0/settings.ini', xpra_host, user,
-                          identity_file)
+                          scp_args)
 
             subprocess.call([
                 'xpra', 'start',
