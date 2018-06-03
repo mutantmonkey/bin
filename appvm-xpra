@@ -3,6 +3,7 @@
 import argparse
 import libvirt
 import os
+import socket
 import subprocess
 import yaml
 
@@ -99,6 +100,12 @@ if __name__ == '__main__':
         ssh_args += ['-i', identity_file]
     if user is not None:
         ssh_args += ['-l', user]
+    if not args.skip_libvirt:
+        ssh_args += [
+            '-o',
+            'HostKeyAlias=appvm:{0}:{1}'.format(socket.gethostname(),
+                                                domain_name)
+        ]
     ssh_args.append(xpra_host)
 
     if args.shell:
