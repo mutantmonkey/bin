@@ -28,10 +28,14 @@ def domain_to_addr(name, uri='qemu:///system'):
     raise Exception("No interfaces found on VM")
 
 
-def scp_if_exists(path, user, host, ssh_identity=None):
+def scp_if_exists(path, host, user=None, ssh_identity=None):
     local_path = os.path.expanduser(os.path.join('~', path))
     if os.path.exists(path):
-        dest = '{0}@{1}:{2}'.format(user, host, path)
+        if user is not None:
+            dest = '{0}@{1}:{2}'.format(user, host, path)
+        else:
+            dest = '{0}@{1}'.format(host, path)
+
         if ssh_identity is not None:
             subprocess.call(['scp', '-i', ssh_identity, local_path, dest])
         else:
@@ -62,6 +66,8 @@ if __name__ == '__main__':
                         help="SSH identity file")
     parser.add_argument('--shell', action='store_true',
                         help="Connect using SSH instead of Xpra")
+    parser.add_argument('--skip-libvirt', action='store_true',
+                        help="Skip Libvirt (use domain name as SSH host)")
     parser.add_argument('domain_name', help="Libvirt domain name of VM")
     parser.add_argument('app', nargs='?', default="firefox",
                         help="App to launch")
@@ -69,35 +75,40 @@ if __name__ == '__main__':
 
     domain_name = args.domain_name
 
-    split_dname = domain_name.split('@', 1)
-    if len(split_dname) > 1:
-        user = split_dname[0]
-        domain_name = split_dname[1]
+    if args.skip_libvirt:
+        xpra_host = domain_name
+        user = None
+        identity_file = None
     else:
-        user = args.user
+        split_dname = domain_name.split('@', 1)
+        if len(split_dname) > 1:
+            user = split_dname[0]
+            domain_name = split_dname[1]
+        else:
+            user = args.user
+
+        xpra_host = domain_to_addr(domain_name)
+        identity_file = args.identity
 
     xpra_display = 10
-    xpra_host = domain_to_addr(domain_name)
     xpra_title = "@title@ on {0}".format(domain_name)
-
     app = args.app
 
+    ssh_args = ['ssh']
+    if identity_file is not None:
+        ssh_args += ['-i', identity_file]
+    if user is not None:
+        ssh_args += ['-l', user]
+    ssh_args.append(xpra_host)
+
     if args.shell:
-        if args.identity is not None:
-            subprocess.call([
-                'ssh', '-i', args.identity, '-l', user, xpra_host])
-        else:
-            subprocess.call([
-                'ssh', '-l', user, xpra_host])
+        subprocess.call(ssh_args)
     else:
-        if args.identity is not None:
-            ssh_cmd = "ssh -i {0}".format(args.identity)
-        else:
-            ssh_cmd = "ssh"
+        ssh_cmd = ' '.join(ssh_args)
 
         p = subprocess.call([
             'xpra', 'attach',
-            'ssh/{0}@{1}/{2}'.format(user, xpra_host, xpra_display),
+            'ssh/{0}/{1}'.format(xpra_host, xpra_display),
             '--ssh={0}'.format(ssh_cmd),
             '--encoding=rgb',
             '--title={0}'.format(xpra_title),
@@ -118,14 +129,14 @@ if __name__ == '__main__':
                     os.environ.get('GDK_DPI_SCALE', '1'),
                     app)
 
-            scp_if_exists('.config/gtk-2.0/gtkrc', user, xpra_host,
-                          args.identity)
-            scp_if_exists('.config/gtk-3.0/settings.ini', user, xpra_host,
-                          args.identity)
+            scp_if_exists('.config/gtk-2.0/gtkrc', xpra_host, user,
+                          identity_file)
+            scp_if_exists('.config/gtk-3.0/settings.ini', xpra_host, user,
+                          identity_file)
 
             subprocess.call([
                 'xpra', 'start',
-                'ssh/{0}@{1}/{2}'.format(user, xpra_host, xpra_display),
+                'ssh/{0}/{1}'.format(xpra_host, xpra_display),
                 '--ssh={0}'.format(ssh_cmd),
                 '--encoding=rgb',
                 '--title={0}'.format(xpra_title),
