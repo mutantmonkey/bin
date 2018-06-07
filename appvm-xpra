@@ -22,7 +22,7 @@ def domain_to_addr(name, uri='qemu:///system'):
     for iface, data in ifaces.items():
         if iface != 'lo':
             for addr in data['addrs']:
-                if addr['type'] == 1 and addr[0:6] == 'fe80':
+                if addr['type'] == 1 and addr['addr'][0:6] == 'fe80::':
                     continue
                 return addr['addr']
 
