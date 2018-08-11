@@ -35,7 +35,7 @@ def scp_if_exists(path, host, user=None, scp_args=['scp']):
         if user is not None:
             dest = '{0}@{1}:{2}'.format(user, host, path)
         else:
-            dest = '{0}@{1}'.format(host, path)
+            dest = '{0}:{1}'.format(host, path)
 
         subprocess.call(scp_args + [local_path, dest])
 
