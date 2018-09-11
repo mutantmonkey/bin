@@ -67,7 +67,7 @@ if __name__ == '__main__':
     parser.add_argument('--skip-libvirt', action='store_true',
                         help="Skip Libvirt (use domain name as SSH host)")
     parser.add_argument('domain_name', help="Libvirt domain name of VM")
-    parser.add_argument('app', nargs='?', default="firefox",
+    parser.add_argument('app', nargs=argparse.REMAINDER,
                         help="App to launch")
     args = parser.parse_args()
 
@@ -90,7 +90,6 @@ if __name__ == '__main__':
 
     xpra_display = 10
     xpra_title = "@title@ on {0}".format(domain_name)
-    app = args.app
 
     ssh_args = ['ssh']
     scp_args = ['scp']
@@ -109,9 +108,14 @@ if __name__ == '__main__':
         scp_args += hka_arg
 
     if args.shell:
-        subprocess.call(ssh_args + [xpra_host])
+        subprocess.call(ssh_args + [xpra_host] + args.app)
     else:
         ssh_cmd = ' '.join(ssh_args)
+
+        if len(args.app) <= 0:
+            app = "firefox"
+        else:
+            app = args.app[0]
 
         p = subprocess.call([
             'xpra', 'attach',
