@@ -16,7 +16,7 @@ xpra attach "${conn_str}" \
     --desktop-scaling=${scale_factor}
 
 if [[ $? != 0 ]]; then
-    app="env TOR_CONTROL_PORT=9151 sandboxed-tor-browser"
+    app="env TOR_CONTROL_PORT=9151 TOR_SKIP_LAUNCH=1 vglrun /home/user/tor-browser_en-US/Browser/start-tor-browser"
     xpra start "${conn_str}" \
         --encoding=rgb \
         --title="@title@ on ${xpra_host}" \
