@@ -51,6 +51,11 @@ case "$1" in
         # http://www.kvrx.org/livestream/
         stream_url=http://tstv-stream.tsm.utexas.edu:8000/kvrx_livestream
         ;;
+    kzsu)
+        # KZSU 90.1 FM Stanford, CA
+        # http://kzsu.stanford.edu/live/
+        stream_url=http://kzsu-streams.stanford.edu/kzsu-1-192.aac
+        ;;
     punk-irratia)
         stream_url=http://kinoki.es:8000/punkirratia
         ;;
