@@ -4,7 +4,7 @@ case "$1" in
     kalx)
         # KALX 90.7 FM Berkeley, CA
         # http://kalx.berkeley.edu/how-listen
-        stream_url=http://icecast.media.berkeley.edu:8000/kalx-128.ogg
+        stream_url=http://stream.kalx.berkeley.edu:8000/kalx-320.aac
         ;;
     kaos)
         # KAOS 89.3 FM Olympia, WA
