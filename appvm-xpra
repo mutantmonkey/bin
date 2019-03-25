@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
         description="Connect to AppVMs using Xpra over SSH")
-    parser.add_argument('--user', '-u', default=default_user,
+    parser.add_argument('--user', '-u', '-l', default=default_user,
                         help="SSH username")
     parser.add_argument('--identity', '-i', default=default_identity,
                         help="SSH identity file")
