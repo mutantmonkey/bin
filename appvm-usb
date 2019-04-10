@@ -1,0 +1,32 @@
+#!/usr/bin/python3
+
+import argparse
+import libvirt
+
+parser = argparse.ArgumentParser(
+    description="Attach/detach USB devices from AppVMs")
+group = parser.add_mutually_exclusive_group(required=True)
+group.add_argument('--attach', action='store_true')
+group.add_argument('--detach', action='store_true')
+parser.add_argument('domain_name', help="Libvirt domain name of VM")
+parser.add_argument('bus', help="Bus number (use lsusb)")
+parser.add_argument('device', help="Device number (use lsusb)")
+args = parser.parse_args()
+
+v = libvirt.open('qemu:///system')
+domain = v.lookupByName(args.domain_name)
+if domain.isActive() != 1:
+    raise Exception("VM is not running")
+
+xml = """\
+<hostdev mode='subsystem' type='usb'>
+  <source>
+    <address bus='{bus}' device='{device}' />
+  </source>
+</hostdev>
+""".format(bus=args.bus, device=args.device)
+
+if args.attach:
+    domain.attachDevice(xml)
+else:
+    domain.detachDevice(xml)
