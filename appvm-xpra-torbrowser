@@ -1,28 +1,43 @@
-#!/bin/sh
+#!/bin/bash
 
 attach=0
 xpra_host="$1"
-conn_str="ssh/${xpra_host}/10"
-scale_factor=${GDK_SCALE:-1}
+libvirt_uri=qemu:///system
+conn_str=vsock://$(virsh -c "$libvirt_uri" -r dumpxml "$xpra_host" | grep cid | sed -E "s/^.*address='([0-9]+)'.*/\1/"):14500
 
-systemctl --user start appvm-ssh@${xpra_host}.service
+if [[ -n "$GDK_SCALE" ]]; then
+    scale_factor=$GDK_SCALE
+    # TODO: this value must be calculated: 2 * 96 * scale_factor
+    dpi="384"
+elif [[ -n "$GDK_DPI_SCALE" ]]; then
+    # FIXME: do calculations for these; remove hardcoded factor from below
+    # or maybe use a global scale env variable?
+    scale_factor="1.5"
+    dpi="192" # note that this is 2x 96 dpi...a scale factor of 2 wants 4x 96 dpi
+else
+    scale_factor=1
+    dpi="96"
+fi
 
-xpra attach "${conn_str}" \
-    --encoding=rgb \
-    --title="@title@ on ${xpra_host}" \
-    --tray=no \
-    --notifications=no \
-    --username=user \
-    --desktop-scaling=${scale_factor}
-
-if [[ $? != 0 ]]; then
-    app="env TOR_CONTROL_PORT=9151 TOR_SKIP_LAUNCH=1 vglrun /home/user/tor-browser_en-US/Browser/start-tor-browser"
-    xpra start "${conn_str}" \
+function xpra_attach {
+    xpra attach "${conn_str}" \
         --encoding=rgb \
         --title="@title@ on ${xpra_host}" \
         --tray=no \
         --notifications=no \
         --username=user \
-        --start-child="${app}" \
-        --desktop-scaling=${scale_factor}
+        --desktop-scaling=${scale_factor} --dpi=${dpi}
+}
+
+xpra_attach
+if [[ $? != 0 ]]; then
+    set -e
+    ssh "${xpra_host}" \
+        xpra start :10 \
+        --bind-vsock=auto:14500 \
+        --env=TOR_CONTROL_PORT=9151 \
+        --env=TOR_SKIP_LAUNCH=1 \
+        --start-after-connect='"vglrun /home/user/tor-browser_en-US/Browser/start-tor-browser"'
+    sleep 5
+    xpra_attach
 fi

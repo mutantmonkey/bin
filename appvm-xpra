@@ -3,13 +3,16 @@
 import argparse
 import libvirt
 import os
+import shlex
 import socket
 import subprocess
+import time
 import yaml
+from xml.etree import ElementTree
 
 
 def domain_to_addr(name, uri='qemu:///system'):
-    v = libvirt.open('qemu:///system')
+    v = libvirt.openReadOnly('qemu:///system')
     domain = v.lookupByName(name)
     if domain.isActive() != 1:
         raise Exception("VM is not running")
@@ -29,6 +32,16 @@ def domain_to_addr(name, uri='qemu:///system'):
     raise Exception("No interfaces found on VM")
 
 
+def domain_to_cid(name, uri='qemu:///system'):
+    v = libvirt.openReadOnly('qemu:///system')
+    domain = v.lookupByName(name)
+    if domain.isActive() != 1:
+        raise Exception("VM is not running")
+
+    et = ElementTree.fromstring(domain.XMLDesc())
+    return et.find('devices/vsock/cid').attrib['address']
+
+
 def scp_if_exists(path, host, user=None, scp_args=['scp']):
     local_path = os.path.expanduser(os.path.join('~', path))
     if os.path.exists(path):
@@ -38,6 +51,19 @@ def scp_if_exists(path, host, user=None, scp_args=['scp']):
             dest = '{0}:{1}'.format(host, path)
 
         subprocess.call(scp_args + [local_path, dest])
+
+
+def xpra_attach(cid, xpra_title):
+    return subprocess.call([
+        'xpra', 'attach',
+        'vsock://{0}:14500'.format(cid),
+        '--encoding=rgb',
+        '--title={0}'.format(xpra_title),
+        '--tray=no',
+        '--notifications=no',
+        '--username=user',
+        '--desktop-scaling=no',
+    ])
 
 
 if __name__ == '__main__':
@@ -58,6 +84,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
         description="Connect to AppVMs using Xpra over SSH")
+    parser.add_argument('--cid', required=False,
+                        help="vsock CID (required when using --skip-libvirt)")
     parser.add_argument('--user', '-u', '-l', default=default_user,
                         help="SSH username")
     parser.add_argument('--identity', '-i', default=default_identity,
@@ -77,6 +105,12 @@ if __name__ == '__main__':
         xpra_host = domain_name
         user = None
         identity_file = None
+
+        if args.cid is not None:
+            cid = args.cid
+        else:
+            parser.error("The --cid argument must be specified when using "
+                         "--skip-libvirt.")
     else:
         split_dname = domain_name.split('@', 1)
         if len(split_dname) > 1:
@@ -87,6 +121,11 @@ if __name__ == '__main__':
 
         xpra_host = domain_to_addr(domain_name)
         identity_file = args.identity
+
+        if args.cid is not None:
+            cid = args.cid
+        else:
+            cid = domain_to_cid(domain_name)
 
     xpra_display = 10
     xpra_title = "@title@ on {0}".format(domain_name)
@@ -117,18 +156,7 @@ if __name__ == '__main__':
         else:
             app = args.app[0]
 
-        p = subprocess.call([
-            'xpra', 'attach',
-            'ssh/{0}/{1}'.format(xpra_host, xpra_display),
-            '--ssh={0}'.format(ssh_cmd),
-            '--encoding=rgb',
-            '--title={0}'.format(xpra_title),
-            '--tray=no',
-            '--notifications=no',
-            '--username=user',
-            '--desktop-scaling=no',
-        ])
-
+        p = xpra_attach(cid, xpra_title)
         if p != 0:
             if len(os.environ.get('GDK_SCALE', '')) > 0:
                 app = "env GDK_SCALE={0} GDK_DPI_SCALE={1} {2}".format(
@@ -144,16 +172,10 @@ if __name__ == '__main__':
             scp_if_exists('.config/gtk-3.0/settings.ini', xpra_host, user,
                           scp_args)
 
-            subprocess.call([
-                'xpra', 'start',
-                'ssh/{0}/{1}'.format(xpra_host, xpra_display),
-                '--ssh={0}'.format(ssh_cmd),
-                '--encoding=rgb',
-                '--title={0}'.format(xpra_title),
-                '--tray=no',
-                '--notifications=no',
-                '--username=user',
-                '--start-child={0}'.format(app),
-                '--start-via-proxy=no',
-                '--desktop-scaling=no',
+            subprocess.call(ssh_args + [xpra_host] + [
+                'xpra', 'start', ':{0}'.format(xpra_display),
+                '--bind-vsock=auto:14500',
+                '--start-after-connect={0}'.format(shlex.quote(app)),
             ])
+            time.sleep(5)
+            xpra_attach(cid, xpra_title)
