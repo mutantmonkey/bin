@@ -158,16 +158,6 @@ if __name__ == '__main__':
 
         p = xpra_attach(cid, xpra_title)
         if p != 0:
-            if len(os.environ.get('GDK_SCALE', '')) > 0:
-                app = "env GDK_SCALE={0} GDK_DPI_SCALE={1} {2}".format(
-                    os.environ['GDK_SCALE'],
-                    os.environ.get('GDK_DPI_SCALE', '1'),
-                    app)
-            elif len(os.environ.get('GDK_DPI_SCALE', '')) > 0:
-                app = "env GDK_DPI_SCALE={0} {1}".format(
-                    os.environ.get('GDK_DPI_SCALE', '1'),
-                    app)
-
             scp_if_exists('.config/gtk-2.0/gtkrc', xpra_host, user, scp_args)
             scp_if_exists('.config/gtk-3.0/settings.ini', xpra_host, user,
                           scp_args)
