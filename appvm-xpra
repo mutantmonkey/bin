@@ -12,7 +12,7 @@ from xml.etree import ElementTree
 
 
 def domain_to_addr(name, uri='qemu:///system'):
-    v = libvirt.openReadOnly('qemu:///system')
+    v = libvirt.open('qemu:///system')
     domain = v.lookupByName(name)
     if domain.isActive() != 1:
         raise Exception("VM is not running")
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Connect to AppVMs using Xpra over SSH")
     parser.add_argument('--cid', required=False,
-                        help="vsock CID (required when using --skip-libvirt)")
+                        help="vsock CID (required if not using libvirt)")
     parser.add_argument('--user', '-u', '-l', default=default_user,
                         help="SSH username")
     parser.add_argument('--identity', '-i', default=default_identity,
@@ -105,12 +105,6 @@ if __name__ == '__main__':
         xpra_host = domain_name
         user = None
         identity_file = None
-
-        if args.cid is not None:
-            cid = args.cid
-        else:
-            parser.error("The --cid argument must be specified when using "
-                         "--skip-libvirt.")
     else:
         split_dname = domain_name.split('@', 1)
         if len(split_dname) > 1:
@@ -122,10 +116,10 @@ if __name__ == '__main__':
         xpra_host = domain_to_addr(domain_name)
         identity_file = args.identity
 
-        if args.cid is not None:
-            cid = args.cid
-        else:
-            cid = domain_to_cid(domain_name)
+    if args.cid is not None:
+        cid = args.cid
+    else:
+        cid = domain_to_cid(domain_name)
 
     xpra_display = 10
     xpra_title = "@title@ on {0}".format(domain_name)
