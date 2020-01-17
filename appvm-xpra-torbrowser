@@ -3,7 +3,13 @@
 attach=0
 xpra_host="$1"
 libvirt_uri=qemu:///system
+domstate=$(virsh -c "$libvirt_uri" -r domstate "$xpra_host")
 conn_str=vsock://$(virsh -c "$libvirt_uri" -r dumpxml "$xpra_host" | grep cid | sed -E "s/^.*address='([0-9]+)'.*/\1/"):14500
+
+if [[ "$domstate" != "running" ]]; then
+    echo "AppVM is not running."
+    exit 1
+fi
 
 if [[ -n "$GDK_SCALE" ]]; then
     scale_factor=$GDK_SCALE
