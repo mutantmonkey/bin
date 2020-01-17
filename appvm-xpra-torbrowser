@@ -13,15 +13,15 @@ fi
 
 if [[ -n "$GDK_SCALE" ]]; then
     scale_factor=$GDK_SCALE
-    # TODO: this value must be calculated: 2 * 96 * scale_factor
-    dpi="384"
+    # TODO: this value must be calculated: 96 * scale_factor
+    dpi="192"
 elif [[ -n "$GDK_DPI_SCALE" ]]; then
     # FIXME: do calculations for these; remove hardcoded factor from below
     # or maybe use a global scale env variable?
     scale_factor="1.5"
-    dpi="192" # note that this is 2x 96 dpi...a scale factor of 2 wants 4x 96 dpi
+    dpi="96"
 else
-    scale_factor=1
+    #scale_factor=1
     dpi="96"
 fi
 
