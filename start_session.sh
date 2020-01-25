@@ -2,7 +2,7 @@
 
 # defaults
 start_irc=0
-start_ncmpcpp=0
+start_ncmpcpp=1
 start_messaging=1
 
 # read arguments and set variables as appropriate
@@ -58,10 +58,23 @@ function restore_i3_layout {
 
 function connect_messaging {
     if [[ "$start_messaging" != 0 ]]; then
-        #nohup sh -c "sleep 5 && connect_xmpp.sh" >/dev/null 2>/dev/null &
-        nohup sh -c "sleep 5 && gtk-launch signal" >/dev/null 2>/dev/null &
-        nohup sh -c "sleep 5 && gtk-launch whatsapp" >/dev/null 2>/dev/null &
-        nohup sh -c "sleep 5 && gtk-launch telegramdesktop" >/dev/null 2>/dev/null &
+        i3-msg "workspace 3; append_layout $HOME/.config/i3/workspace-3.json"
+        sleep 5   && start_messengers_if_connected && return 0
+        sleep 10  && start_messengers_if_connected && return 0
+        sleep 25  && start_messengers_if_connected && return 0
+        sleep 60  && start_messengers_if_connected && return 0
+        sleep 125 && start_messengers_if_connected && return 0
+    fi
+}
+
+function start_messengers_if_connected {
+    if [[ "$(nmcli network connectivity)" == "full" ]]; then
+        gtk-launch signal-desktop
+        gtk-launch whatsapp
+        gtk-launch telegramdesktop
+        return 0
+    else
+        return 1
     fi
 }
 
