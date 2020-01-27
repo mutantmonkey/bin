@@ -78,6 +78,20 @@ function start_messengers_if_connected {
     fi
 }
 
+function start_mpd {
+    if is-home-network-active; then
+        # home; use server's database
+        systemctl --user start mpd.service
+    elif is-trusted-network-active; then
+        # connected to a "trusted" network; use local mpd database without an HTTP proxy
+        systemctl --user start mpd@away_noproxy.service
+    else
+        # somewhere else; use local mpd database with an HTTP proxy
+        systemctl --user start mpd@away.service
+    fi
+}
+
 spawn_tmux
 restore_i3_layout
 connect_messaging
+start_mpd
