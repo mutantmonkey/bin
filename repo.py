@@ -9,13 +9,15 @@ import tarfile
 
 
 class Package(object):
-    def __init__(self, name, version=None):
+    def __init__(self, name, version=None, filename=None):
         if version is not None:
             self.name = name
             self.version = version
         else:
             self.name = name[0]
             self.version = name[1]
+
+        self.filename = filename
 
     def __lt__(self, other):
         # FIXME: also compare version
@@ -39,22 +41,35 @@ def list_packages(repo):
     pkgs = set()
     with tarfile.open(repo) as tar:
         for tarinfo in tar:
-            if tarinfo.isdir():
-                comps = tarinfo.name.rsplit('-', 2)
-                comps[1] += '-' + comps[2]
-                pkgs.add(Package(comps))
+            if tarinfo.name[-5:] == '/desc':
+                pkg_data = {}
+                next_line_key = None
+                contents = tar.extractfile(tarinfo)
+                for line in contents.readlines():
+                    line = line.decode('utf-8').rstrip('\n')
+                    if line == '%FILENAME%':
+                        next_line_key = 'filename'
+                    elif line == '%NAME%':
+                        next_line_key = 'name'
+                    elif line == '%VERSION%':
+                        next_line_key = 'version'
+                    else:
+                        if next_line_key is not None:
+                            pkg_data[next_line_key] = line.rstrip()
+                        next_line_key = None
+
+                pkgs.add(Package(**pkg_data))
 
     return pkgs
 
 
 def print_orphaned(repo):
     pkgs = list_packages(repo)
+    expected_filenames = [pkg.filename for pkg in pkgs]
     for f in glob.glob('*.pkg.tar.*'):
-        comps = f.rsplit('-', 3)
-        comps += comps.pop().split('.', 1)
-        comps[1] += '-' + comps[2]
-        pkg = Package(comps[:2])
-        if pkg not in pkgs:
+        # signature filenames are the package filename + .sig
+        check_filename = f.rsplit('.sig', 1)[0]
+        if check_filename not in expected_filenames:
             print(f)
 
 
