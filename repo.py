@@ -83,17 +83,18 @@ def list_installed(dbpath):
     return pkgs
 
 
-def check_updates(repo, batch=False):
+def check_updates(repo, batch=True):
     all_pkgs = sorted(list_packages(repo))
 
     if batch:
         pkg_map = {}
-        params = ['type=multiinfo']
+        params = ['v=5', 'type=info']
         for pkg in all_pkgs:
             pkg_map[pkg.name] = pkg
             params.append('arg[]={}'.format(pkg.name))
+        remaining_pkgs = set(pkg_map.keys())
 
-        r = requests.get('https://aur.archlinux.org/rpc.php?{}'.format(
+        r = requests.get('https://aur.archlinux.org/rpc/?{}'.format(
             '&'.join(params)))
         data = r.json()
 
@@ -101,14 +102,19 @@ def check_updates(repo, batch=False):
             pkg = pkg_map[aurpkg['Name']]
             if pyalpm.vercmp(aurpkg['Version'], pkg.version) > 0:
                 yield pkg, aurpkg['Version']
+            remaining_pkgs.remove(aurpkg['Name'])
+
+        for pkg in remaining_pkgs:
+            print("warning: {} is not in the AUR".format(pkg),
+                  file=sys.stderr)
     else:
         for pkg in all_pkgs:
             r = requests.get(
-                'https://aur.archlinux.org/rpc.php?type=info&arg={}'.format(
+                'https://aur.archlinux.org/rpc/?v=5&type=info&arg[]={}'.format(
                     pkg.name))
             data = r.json()
-            if type(data['results']) == dict:
-                aur_version = data['results']['Version']
+            if len(data['results']) == 1:
+                aur_version = data['results'][0]['Version']
                 if pyalpm.vercmp(aur_version, pkg.version) > 0:
                     yield pkg, aur_version
             else:
