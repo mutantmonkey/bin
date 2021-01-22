@@ -51,9 +51,9 @@ function spawn_tmux {
 
 function restore_i3_layout {
     i3-msg "workspace 1; append_layout $HOME/.config/i3/workspace-1.json"
-    nohup termite --role termite-tmux -e 'tmux a -t0' 2>/dev/null >/dev/null &
-    nohup termite --role termite-mail -e 'tmux a -tmail' 2>/dev/null >/dev/null &
-    nohup termite --role termite-music -e 'tmux a -tmusic' 2>/dev/null >/dev/null &
+    nohup termite --title=tmux --role=termite-tmux -e 'tmux a -t0' 2>/dev/null >/dev/null &
+    nohup termite --title=mail --role=termite-mail -e 'tmux a -tmail' 2>/dev/null >/dev/null &
+    nohup termite --title=music --role=termite-music -e 'tmux a -tmusic' 2>/dev/null >/dev/null &
 }
 
 function connect_messaging {
