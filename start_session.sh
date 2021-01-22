@@ -70,7 +70,7 @@ function connect_messaging {
 function start_messengers_if_connected {
     if [[ "$(nmcli network connectivity)" == "full" ]]; then
         gtk-launch signal-desktop
-        gtk-launch whatsapp
+        #gtk-launch whatsapp
         gtk-launch telegramdesktop
         return 0
     else
