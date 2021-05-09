@@ -2,10 +2,12 @@
 
 import argparse
 import glob
+import os.path
 import pyalpm
 import requests
 import sys
 import tarfile
+from srcinfo.parse import parse_srcinfo
 
 
 class Package(object):
@@ -122,6 +124,20 @@ def check_updates(repo, batch=True):
                       file=sys.stderr)
 
 
+def print_pkg(pkg, pkgonly=False):
+    if pkgonly:
+        print(pkg.name)
+    else:
+        print(pkg)
+
+
+def has_vcs_suffix(pkgname):
+    return pkgname.endswith('-bzr') \
+            or pkgname.endswith('-git') \
+            or pkgname.endswith('-hg') \
+            or pkgname.endswith('-svn')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Arch repository helper")
     group = parser.add_mutually_exclusive_group(required=True)
@@ -136,10 +152,18 @@ if __name__ == '__main__':
                             "installed on the local system")
     group.add_argument('--check-updates', action='store_true',
                        help="check packages in the repository for updates")
+    group.add_argument('--compare-with-sources', action='store_true',
+                       help="compare packages with those found in a package "
+                            "source directory")
     parser.add_argument('--dbpath', '-b', type=str, default='/var/lib/pacman',
                         help="specify an alternative pacman database location")
     parser.add_argument('--pkgonly', action='store_true',
                         help="do not include version in package lists")
+    parser.add_argument('--srcpath', type=str,
+                        help="path to package source directory")
+    parser.add_argument('--skip-vcs-suffix', action='store_true',
+                        help="skip packages that use a common VCS suffix "
+                             "(e.g. -git) when using --compare-with-sources")
     parser.add_argument('repo', help="path to repository database file")
 
     args = parser.parse_args()
@@ -148,17 +172,11 @@ if __name__ == '__main__':
         print_orphaned(args.repo)
     elif args.list_packages:
         for pkg in sorted(list_packages(args.repo)):
-            if args.pkgonly:
-                print(pkg.name)
-            else:
-                print(pkg)
+            print_pkg(pkg, args.pkgonly)
     elif args.list_uninstalled:
         for pkg in sorted(list_packages(args.repo) -
                           list_installed(args.dbpath)):
-            if args.pkgonly:
-                print(pkg.name)
-            else:
-                print(pkg)
+            print_pkg(pkg, args.pkgonly)
     elif args.check_updates:
         for pkg, version in check_updates(args.repo):
             if args.pkgonly:
@@ -166,3 +184,24 @@ if __name__ == '__main__':
             else:
                 # emulate the cower -b format
                 print(":: {pkg} -> {version}".format(pkg=pkg, version=version))
+    elif args.compare_with_sources:
+        if args.srcpath is None or len(args.srcpath) <= 0:
+            print("fatal: a --srcpath must be provided.", file=sys.stderr)
+            sys.exit(1)
+
+        source_packages = set([])
+
+        for srcinfo_file in glob.glob(os.path.join(args.srcpath,
+                                                   '*/.SRCINFO')):
+            with open(srcinfo_file) as f:
+                result, errors = parse_srcinfo(f.read())
+                pkgver = '{0}-{1}'.format(result['pkgver'], result['pkgrel'])
+                if result.get('epoch', None) is not None:
+                    pkgver = '{0}:{1}'.format(result['epoch'], pkgver)
+
+                for pkgname in result['packages']:
+                    if not args.skip_vcs_suffix or not has_vcs_suffix(pkgname):
+                        source_packages.add(Package(pkgname, pkgver))
+
+        for pkg in sorted(source_packages - list_packages(args.repo)):
+            print_pkg(pkg, args.pkgonly)
