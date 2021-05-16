@@ -224,11 +224,10 @@ if __name__ == '__main__':
                         help="do not include version in package lists")
     parser.add_argument('--srcpath', type=str,
                         help="path to package source directory")
-    group2 = parser.add_mutually_exclusive_group(required=False)
-    group2.add_argument('--compare-pkgbuild', action='store_true',
+    parser.add_argument('--compare-pkgbuild', action='store_true',
                         help="compare PKGBUILD instead of package version "
                              "when using --compare-with-sources")
-    group2.add_argument('--skip-vcs-suffix', action='store_true',
+    parser.add_argument('--skip-vcs-suffix', action='store_true',
                         help="skip packages that use a common VCS suffix "
                              "(e.g. -git) when using --compare-with-sources")
     parser.add_argument('repo', help="path to repository database file")
