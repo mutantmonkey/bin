@@ -170,7 +170,7 @@ def compare_with_sources_pkgver(repo, srcpath, skip_vcs_suffix=False):
         yield pkg
 
 
-def compare_with_sources_sha256sum(repo, srcpath):
+def compare_with_sources_sha256sum(repo, srcpath, skip_vcs_suffix=False):
     pkgbuild_sha256sums = {}
 
     for srcinfo_file in glob.glob(os.path.join(srcpath,
@@ -186,19 +186,25 @@ def compare_with_sources_sha256sum(repo, srcpath):
                 pkgbuild_sha256sums[pkgname] = h.hexdigest()
 
     for pkg in list_packages(repo):
-        expected_pkgbuild_sha256sum = pkgbuild_sha256sums[pkg.name]
+        if skip_vcs_suffix and has_vcs_suffix(pkg.name):
+            continue
+
+        expected_sha256sum = pkgbuild_sha256sums[pkg.name]
+        actual_sha256sum = None
 
         if pkg.filename.endswith('.zst'):
             with open_tar_zst(pkg.filename) as tar:
                 for tarinfo in tar:
-                    if tarinfo.name[-5:] == '/.BUILDINFO':
+                    if tarinfo.name[-10:] == '.BUILDINFO':
                         contents = tar.extractfile(tarinfo)
                         for line in contents.readlines():
+                            line = line.decode('utf-8')
                             if line.startswith('pkgbuild_sha256sum'):
                                 _, v = line.split('=', 1)
+                                actual_sha256sum = v.strip()
 
-                                if v.strip() != expected_pkgbuild_sha256sum:
-                                    yield pkg
+        if actual_sha256sum is None or actual_sha256sum != expected_sha256sum:
+            yield pkg
 
 
 if __name__ == '__main__':
@@ -256,7 +262,8 @@ if __name__ == '__main__':
             sys.exit(1)
 
         if args.compare_pkgbuild:
-            for pkg in compare_with_sources_sha256sum(args.repo, args.srcpath):
+            for pkg in compare_with_sources_sha256sum(args.repo, args.srcpath,
+                                                      args.skip_vcs_suffix):
                 print_pkg(pkg, args.pkgonly)
         else:
             for pkg in compare_with_sources_pkgver(args.repo, args.srcpath,
