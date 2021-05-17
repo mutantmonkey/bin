@@ -2,11 +2,14 @@
 
 import argparse
 import glob
+import hashlib
 import os.path
 import pyalpm
 import requests
 import sys
 import tarfile
+import zstandard
+from contextlib import contextmanager
 from srcinfo.parse import parse_srcinfo
 
 
@@ -138,6 +141,66 @@ def has_vcs_suffix(pkgname):
             or pkgname.endswith('-svn')
 
 
+# https://github.com/indygreg/python-zstandard/issues/64#issuecomment-647811500
+@contextmanager
+def open_tar_zst(path_tar_zst):
+    """Decompress and open a .tar.zst file"""
+    with open(path_tar_zst, 'rb') as fh:
+        dctx = zstandard.ZstdDecompressor()
+        with dctx.stream_reader(fh) as stream:
+            yield tarfile.TarFile(fileobj=stream)
+
+
+def compare_with_sources_pkgver(repo, srcpath, skip_vcs_suffix=False):
+    source_packages = set([])
+
+    for srcinfo_file in glob.glob(os.path.join(srcpath,
+                                               '*/.SRCINFO')):
+        with open(srcinfo_file) as f:
+            result, errors = parse_srcinfo(f.read())
+            pkgver = '{0}-{1}'.format(result['pkgver'], result['pkgrel'])
+            if result.get('epoch', None) is not None:
+                pkgver = '{0}:{1}'.format(result['epoch'], pkgver)
+
+                for pkgname in result['packages']:
+                    if not skip_vcs_suffix or not has_vcs_suffix(pkgname):
+                        source_packages.add(Package(pkgname, pkgver))
+
+    for pkg in sorted(source_packages - list_packages(repo)):
+        yield pkg
+
+
+def compare_with_sources_sha256sum(repo, srcpath):
+    pkgbuild_sha256sums = {}
+
+    for srcinfo_file in glob.glob(os.path.join(srcpath,
+                                               '*/.SRCINFO')):
+        with open(srcinfo_file) as f:
+            result, errors = parse_srcinfo(f.read())
+            with open(srcinfo_file.replace('.SRCINFO', 'PKGBUILD'),
+                      'rb') as p:
+                h = hashlib.sha256()
+                h.update(p.read())
+
+            for pkgname in result['packages']:
+                pkgbuild_sha256sums[pkgname] = h.hexdigest()
+
+    for pkg in list_packages(repo):
+        expected_pkgbuild_sha256sum = pkgbuild_sha256sums[pkg.name]
+
+        if pkg.filename.endswith('.zst'):
+            with open_tar_zst(pkg.filename) as tar:
+                for tarinfo in tar:
+                    if tarinfo.name[-5:] == '/.BUILDINFO':
+                        contents = tar.extractfile(tarinfo)
+                        for line in contents.readlines():
+                            if line.startswith('pkgbuild_sha256sum'):
+                                _, v = line.split('=', 1)
+
+                                if v.strip() != expected_pkgbuild_sha256sum:
+                                    yield pkg
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Arch repository helper")
     group = parser.add_mutually_exclusive_group(required=True)
@@ -161,6 +224,9 @@ if __name__ == '__main__':
                         help="do not include version in package lists")
     parser.add_argument('--srcpath', type=str,
                         help="path to package source directory")
+    parser.add_argument('--compare-pkgbuild', action='store_true',
+                        help="compare PKGBUILD instead of package version "
+                             "when using --compare-with-sources")
     parser.add_argument('--skip-vcs-suffix', action='store_true',
                         help="skip packages that use a common VCS suffix "
                              "(e.g. -git) when using --compare-with-sources")
@@ -189,19 +255,10 @@ if __name__ == '__main__':
             print("fatal: a --srcpath must be provided.", file=sys.stderr)
             sys.exit(1)
 
-        source_packages = set([])
-
-        for srcinfo_file in glob.glob(os.path.join(args.srcpath,
-                                                   '*/.SRCINFO')):
-            with open(srcinfo_file) as f:
-                result, errors = parse_srcinfo(f.read())
-                pkgver = '{0}-{1}'.format(result['pkgver'], result['pkgrel'])
-                if result.get('epoch', None) is not None:
-                    pkgver = '{0}:{1}'.format(result['epoch'], pkgver)
-
-                for pkgname in result['packages']:
-                    if not args.skip_vcs_suffix or not has_vcs_suffix(pkgname):
-                        source_packages.add(Package(pkgname, pkgver))
-
-        for pkg in sorted(source_packages - list_packages(args.repo)):
-            print_pkg(pkg, args.pkgonly)
+        if args.compare_pkgbuild:
+            for pkg in compare_with_sources_sha256sum(args.repo, args.srcpath):
+                print_pkg(pkg, args.pkgonly)
+        else:
+            for pkg in compare_with_sources_pkgver(args.repo, args.srcpath,
+                                                   args.skip_vcs_suffix):
+                print_pkg(pkg, args.pkgonly)
