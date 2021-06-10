@@ -189,7 +189,7 @@ def compare_with_sources_sha256sum(repo, srcpath, skip_vcs_suffix=False):
         if skip_vcs_suffix and has_vcs_suffix(pkg.name):
             continue
 
-        expected_sha256sum = pkgbuild_sha256sums[pkg.name]
+        expected_sha256sum = pkgbuild_sha256sums.get(pkg.name)
         actual_sha256sum = None
 
         if pkg.filename.endswith('.zst'):
