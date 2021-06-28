@@ -116,7 +116,10 @@ if __name__ == '__main__':
         else:
             user = args.user
 
-        xpra_host = domain_to_addr(domain_name)
+        if args.use_vsock:
+            xpra_host = domain_name
+        else:
+            xpra_host = domain_to_addr(domain_name)
         identity_file = args.identity
 
     if args.cid is not None:
