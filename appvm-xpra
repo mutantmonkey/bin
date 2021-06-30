@@ -94,8 +94,8 @@ if __name__ == '__main__':
                         help="Connect using SSH instead of Xpra")
     parser.add_argument('--skip-libvirt', action='store_true',
                         help="Skip Libvirt (use domain name as SSH host)")
-    parser.add_argument('--use-vsock', action='store_true',
-                        help="Connect to SSH using AF_VSOCK")
+    parser.add_argument('--disable-ssh-vsock', action='store_true',
+                        help="Disable connections to SSH using AF_VSOCK")
     parser.add_argument('domain_name', help="Libvirt domain name of VM")
     parser.add_argument('app', nargs=argparse.REMAINDER,
                         help="App to launch")
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         else:
             user = args.user
 
-        if args.use_vsock:
+        if not args.disable_ssh_vsock:
             xpra_host = domain_name
         else:
             xpra_host = domain_to_addr(domain_name)
@@ -144,7 +144,7 @@ if __name__ == '__main__':
         ]
         ssh_args += hka_arg
         scp_args += hka_arg
-    if args.use_vsock:
+    if not args.disable_ssh_vsock:
         pc_arg = [
             '-o',
             f'ProxyCommand=socat vsock-connect:{cid}:22 -',
