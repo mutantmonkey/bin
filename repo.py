@@ -5,6 +5,7 @@ import glob
 import hashlib
 import os.path
 import pyalpm
+import re
 import requests
 import sys
 import tarfile
@@ -145,51 +146,35 @@ def has_vcs_suffix(pkgname):
 @contextmanager
 def open_tar_zst(path_tar_zst):
     """Decompress and open a .tar.zst file"""
-    with open(path_tar_zst, 'rb') as fh:
-        dctx = zstandard.ZstdDecompressor()
-        with dctx.stream_reader(fh) as stream:
-            yield tarfile.TarFile(fileobj=stream)
-
-
-def compare_with_sources_pkgver(repo, srcpath, skip_vcs_suffix=False):
-    source_packages = set([])
-
-    for srcinfo_file in glob.glob(os.path.join(srcpath,
-                                               '*/.SRCINFO')):
-        with open(srcinfo_file) as f:
-            result, errors = parse_srcinfo(f.read())
-            pkgver = '{0}-{1}'.format(result['pkgver'], result['pkgrel'])
-            if result.get('epoch', None) is not None:
-                pkgver = '{0}:{1}'.format(result['epoch'], pkgver)
-
-                for pkgname in result['packages']:
-                    if not skip_vcs_suffix or not has_vcs_suffix(pkgname):
-                        source_packages.add(Package(pkgname, pkgver))
-
-    for pkg in sorted(source_packages - list_packages(repo)):
-        yield pkg
+    with zstandard.open(path_tar_zst, 'rb') as fh:
+        yield tarfile.TarFile(fileobj=fh)
 
 
 def compare_with_sources_sha256sum(repo, srcpath, skip_vcs_suffix=False):
-    pkgbuild_sha256sums = {}
+    pkgbuild_meta = {}
 
     for srcinfo_file in glob.glob(os.path.join(srcpath,
                                                '*/.SRCINFO')):
         with open(srcinfo_file) as f:
             result, errors = parse_srcinfo(f.read())
-            with open(srcinfo_file.replace('.SRCINFO', 'PKGBUILD'),
-                      'rb') as p:
+            path = srcinfo_file.replace('.SRCINFO', 'PKGBUILD')
+            with open(path, 'rb') as p:
                 h = hashlib.sha256()
                 h.update(p.read())
 
             for pkgname in result['packages']:
-                pkgbuild_sha256sums[pkgname] = h.hexdigest()
+                pkgbuild_meta[pkgname] = {
+                    'path': path,
+                    'sha256sum': h.hexdigest(),
+                }
 
     for pkg in list_packages(repo):
         if skip_vcs_suffix and has_vcs_suffix(pkg.name):
             continue
 
-        expected_sha256sum = pkgbuild_sha256sums.get(pkg.name)
+        meta = pkgbuild_meta.get(pkg.name, {})
+        pkgbuild_path = meta.get('path')
+        expected_sha256sum = meta.get('sha256sum')
         actual_sha256sum = None
 
         if pkg.filename.endswith('.zst'):
@@ -200,8 +185,30 @@ def compare_with_sources_sha256sum(repo, srcpath, skip_vcs_suffix=False):
                         for line in contents.readlines():
                             line = line.decode('utf-8')
                             if line.startswith('pkgbuild_sha256sum'):
-                                _, v = line.split('=', 1)
-                                actual_sha256sum = v.strip()
+                                actual_sha256sum = line.split(
+                                    '=', 1)[1].strip()
+                            elif line.startswith('pkgver'):
+                                actual_pkgver = line.split('=', 1)[1].strip()
+
+        # if the sha256sum differs, try calculating what it will be if we fix
+        # the pkgver to match the output package; this allows us to
+        # automatically correct for dynamically generated pkgvers
+        if actual_sha256sum is not None and \
+                actual_sha256sum != expected_sha256sum and \
+                pkgbuild_path is not None:
+            print(
+                "warning: PKGBUILD for {} differs, trying to adjust "
+                "pkgver...".format(pkg),
+                file=sys.stderr)
+            with open(pkgbuild_path, 'rb') as p:
+                new_pkgver, _ = actual_pkgver.split('-', 1)
+                contents = p.read()
+                h = hashlib.sha256()
+                h.update(re.sub(
+                    rb'\npkgver=.*\n',
+                    f'\npkgver={new_pkgver}\n'.encode('utf-8'),
+                    contents))
+                expected_sha256sum = h.hexdigest()
 
         if actual_sha256sum is None or actual_sha256sum != expected_sha256sum:
             yield pkg
@@ -222,8 +229,9 @@ if __name__ == '__main__':
     group.add_argument('--check-updates', action='store_true',
                        help="check packages in the repository for updates")
     group.add_argument('--compare-with-sources', action='store_true',
-                       help="compare packages with those found in a package "
-                            "source directory")
+                       help="compare built packages with those found in a "
+                            "source directory, ensuring that the sha256sum "
+                            "of the PKGBUILD matches")
     parser.add_argument('--dbpath', '-b', type=str, default='/var/lib/pacman',
                         help="specify an alternative pacman database location")
     parser.add_argument('--pkgonly', action='store_true',
@@ -231,8 +239,7 @@ if __name__ == '__main__':
     parser.add_argument('--srcpath', type=str,
                         help="path to package source directory")
     parser.add_argument('--compare-pkgbuild', action='store_true',
-                        help="compare PKGBUILD instead of package version "
-                             "when using --compare-with-sources")
+                        help="deprecated")
     parser.add_argument('--skip-vcs-suffix', action='store_true',
                         help="skip packages that use a common VCS suffix "
                              "(e.g. -git) when using --compare-with-sources")
@@ -261,11 +268,6 @@ if __name__ == '__main__':
             print("fatal: a --srcpath must be provided.", file=sys.stderr)
             sys.exit(1)
 
-        if args.compare_pkgbuild:
-            for pkg in compare_with_sources_sha256sum(args.repo, args.srcpath,
-                                                      args.skip_vcs_suffix):
-                print_pkg(pkg, args.pkgonly)
-        else:
-            for pkg in compare_with_sources_pkgver(args.repo, args.srcpath,
-                                                   args.skip_vcs_suffix):
-                print_pkg(pkg, args.pkgonly)
+        for pkg in compare_with_sources_sha256sum(args.repo, args.srcpath,
+                                                  args.skip_vcs_suffix):
+            print_pkg(pkg, args.pkgonly)
