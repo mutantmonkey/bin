@@ -7,6 +7,7 @@ import os.path
 import pyalpm
 import re
 import requests
+import subprocess
 import sys
 import tarfile
 import zstandard
@@ -232,12 +233,17 @@ if __name__ == '__main__':
                        help="compare built packages with those found in a "
                             "source directory, ensuring that the sha256sum "
                             "of the PKGBUILD matches")
+    group.add_argument('--verify-attestations', action='store_true',
+                       help="verify that all packages have a valid "
+                            "attestation of provenance from GitHub")
     parser.add_argument('--dbpath', '-b', type=str, default='/var/lib/pacman',
                         help="specify an alternative pacman database location")
     parser.add_argument('--pkgonly', action='store_true',
                         help="do not include version in package lists")
     parser.add_argument('--srcpath', type=str,
                         help="path to package source directory")
+    parser.add_argument('--github-repo', type=str,
+                        help="github repository in owner/repo format")
     parser.add_argument('--compare-pkgbuild', action='store_true',
                         help="deprecated")
     parser.add_argument('--skip-vcs-suffix', action='store_true',
@@ -271,3 +277,19 @@ if __name__ == '__main__':
         for pkg in compare_with_sources_sha256sum(args.repo, args.srcpath,
                                                   args.skip_vcs_suffix):
             print_pkg(pkg, args.pkgonly)
+    elif args.verify_attestations:
+        if args.github_repo is None or len(args.github_repo) <= 0:
+            print("fatal: a --github-repo must be provided.", file=sys.stderr)
+            sys.exit(1)
+
+        for pkg in sorted(list_packages(args.repo)):
+            result = subprocess.call(
+                [
+                    'gh', 'attestation', 'verify', '-R', args.github_repo,
+                    pkg.filename,
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            status = "ok" if result == 0 else "fail"
+            print(f"{pkg.filename}: {status}")
