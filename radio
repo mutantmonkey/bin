@@ -26,13 +26,16 @@ except Exception as exc:
     print("Failed to check local stations file: {0}".format(exc))
 
 if station is None:
+    # FIXME: do a DNS lookup for all.api.radio-browwser.info first
+    # https://api.radio-browser.info/
+    # there's actually libraries for this so maybe I should just use those
     r = requests.get(
-        'http://www.radio-browser.info/webservice/json/stations/byname/'
+        'https://de1.api.radio-browser.info/webservice/json/stations/byname/'
         '{0}'.format(urllib.parse.quote(query)))
     results = r.json()
     if len(results) > 0:
         r = requests.get(
-            'http://www.radio-browser.info/webservice/json/url/'
+            'https://de1.api.radio-browser.info/webservice/json/url/'
             '{0}'.format(results[0]['id']))
         try:
             data = r.json()
